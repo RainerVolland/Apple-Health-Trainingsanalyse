@@ -428,10 +428,20 @@ function showUpload(){
 // UPLOAD HANDLERS
 // ═══════════════════════════════════════════════════════════
 
+// Bump this string whenever cached workout structure changes (forces one-time re-import)
+var WORKOUT_CACHE_VERSION = 'v3-appleElev';
+
 function initUploadUI(){
-  // ── First: check if we have cached data → show welcome screen ────────────
+  // ── First: check if we have valid cached data → show welcome screen ───────
   try{
+    var cachedVersion = localStorage.getItem('cachedWorkoutsVersion');
     var cached = localStorage.getItem('cachedWorkouts');
+    if(cachedVersion !== WORKOUT_CACHE_VERSION){
+      // Stale cache (built before elevation fix) — discard silently
+      localStorage.removeItem('cachedWorkouts');
+      localStorage.removeItem('cachedWorkoutsVersion');
+      cached = null;
+    }
     if(cached){
       var ws = JSON.parse(cached);
       if(ws && ws.length > 0){
@@ -851,11 +861,12 @@ async function parseAndBuild(xmlFile){
     // If plan exists, show welcome screen instead of upload on next load
     try{
       localStorage.setItem('lastSyncDate', new Date().toISOString());
-      // Cache workouts for next visit (only runs+hikes to save space, max 1000 entries)
+      // Cache workouts for next visit (only runs+hikes to save space, max 1200 entries)
       var toCache = ALL_WORKOUTS.filter(function(w){
         return w.type==='Laufen'||w.type==='Hiking'||w.type==='Radfahren';
       }).slice(-1200);
       localStorage.setItem('cachedWorkouts', JSON.stringify(toCache));
+      localStorage.setItem('cachedWorkoutsVersion', WORKOUT_CACHE_VERSION);
     }catch(e){ console.warn('Cache save failed:', e.message); }
 
   }catch(e){
