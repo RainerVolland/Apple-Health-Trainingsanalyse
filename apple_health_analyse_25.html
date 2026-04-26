@@ -2261,6 +2261,80 @@ function exportPlanForLLM(){
   dlFile('plan_llm_input.json', JSON.stringify(output,null,2), 'application/json');
 }
 
+// ── Convert workouts.json format → plan format ────────────────────────────────
+function convertWorkoutsToPlan(workouts){
+  const SPORT_TYPE = { CoreTraining:'EL', Radfahren:'EL', Schwimmen:'EL', Yoga:'EL', Wandern:'LL', Klettern:'EL' };
+  const DAY_LABELS = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+  const getMonday = dateStr => {
+    const d = new Date(dateStr); d.setHours(0,0,0,0);
+    const day = d.getDay();
+    d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+    return d.toISOString().slice(0,10);
+  };
+  const today = new Date().toISOString().slice(0,10);
+
+  // Group by Monday of week
+  const weekMap = {};
+  for(const w of workouts){
+    if(!w.startTime) continue;
+    const date = w.startTime.slice(0,10);
+    const mon = getMonday(date);
+    if(!weekMap[mon]) weekMap[mon] = [];
+    weekMap[mon].push({...w, _date: date});
+  }
+
+  return Object.keys(weekMap).sort().map((mon, i) => {
+    const entries = weekMap[mon];
+    const targetVol   = Math.round(entries.reduce((s,x)=>s+(x.distanceKm||0),0)*10)/10;
+    const targetLong  = Math.round(Math.max(0,...entries.map(s=>s.distanceKm||0))*10)/10;
+    const targetHm    = Math.max(0,...entries.map(s=>s.elevationM||0));
+
+    const sessions = entries.map(s => {
+      const d = new Date(s._date);
+      const weekday = d.getDay();
+      const isWE = weekday === 0 || weekday === 6;
+      const isPast = s._date <= today;
+      const km = s.distanceKm || 0;
+      const hm = s.elevationM || 0;
+
+      // Infer session type; honour explicit planType field if LLM provided it
+      let type = s.planType || null;
+      if(!type){
+        if(s.sportType === 'Laufen'){
+          if(km >= 20)        type = hm >= 500 ? 'LLH' : 'LL';
+          else if(km >= 14)   type = hm >= 300 && isWE ? 'LLH' : 'M';
+          else if(hm >= 200 && isWE) type = 'HI';
+          else if(km >= 8)    type = 'IL';
+          else                type = 'R';
+        } else {
+          type = SPORT_TYPE[s.sportType] || 'EL';
+        }
+      }
+      // HI only allowed on weekends/holidays
+      if(type === 'HI' && !isWeekendOrHoliday(s._date)) type = 'IL';
+
+      return {
+        date:       s._date,
+        dayLabel:   DAY_LABELS[weekday],
+        type,
+        durationMin: Math.round(s.durationMin || 60),
+        distKm:     s.distanceKm || null,
+        hmTarget:   hm,
+        status:     isPast ? 'done' : 'planned',
+        actualKm:   isPast ? (s.distanceKm || null)  : null,
+        actualHm:   isPast ? (s.elevationM  || null)  : null,
+        actualHr:   isPast ? (s.avgHr       || null)  : null,
+        note:       s.note || '',
+        tips:       '',
+        time:       isWE ? '07:00' : '05:30',
+        syncedFrom: s.sourceId || null,
+      };
+    });
+
+    return { wk: i+1, phase:'Build', targetVol, targetLong, targetHm, note:'', sessions };
+  });
+}
+
 // ── Import LLM-generated plan ─────────────────────────────────────────────────
 async function importLLMPlan(event){
   const file = event.target.files[0]; if(!file) return;
@@ -2272,10 +2346,15 @@ async function importLLMPlan(event){
     showJsonSyncResult('error','❌ Ungültige JSON-Datei: '+e.message); return;
   }
 
-  // Accept either a bare array or {plan:[...]} wrapper
-  const newPlan = Array.isArray(incoming) ? incoming : (incoming.plan || incoming.planVoll);
+  // Accept plan format, {plan/planVoll} wrapper, or workouts.json (flat array with startTime)
+  let newPlan = Array.isArray(incoming) ? incoming : (incoming.plan || incoming.planVoll);
+  if(Array.isArray(newPlan) && newPlan.length > 0 && newPlan[0]?.startTime !== undefined && !newPlan[0]?.sessions){
+    // workouts.json format — auto-convert to plan weeks
+    newPlan = convertWorkoutsToPlan(newPlan);
+    showJsonSyncResult('info','ℹ️ workouts.json erkannt — automatisch in Planformat konvertiert…');
+  }
   if(!Array.isArray(newPlan)||!newPlan[0]?.sessions){
-    showJsonSyncResult('error','❌ Format nicht erkannt. Erwartet: Array von Wochen-Objekten mit sessions[]'); return;
+    showJsonSyncResult('error','❌ Format nicht erkannt. Erwartet: Wochen-Array mit sessions[] oder workouts.json mit startTime.'); return;
   }
 
   // Validate required fields
