@@ -2373,6 +2373,11 @@ async function importLLMPlan(event){
     }
   }
 
+  // Remap R (rest) → EL when the session clearly contains a run (LLMs often use R for easy runs)
+  newPlan.forEach(wk=>wk.sessions.forEach(s=>{
+    if(s.type==='R' && (s.distKm > 0 || s.durationMin >= 30)) s.type='EL';
+  }));
+
   // Preserve existing Ist-Daten: merge status/actualKm/actualHm/actualHr by date
   const existingPlan = loadPlan() || [];
   const existingByDate = {};
