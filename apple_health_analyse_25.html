@@ -3058,10 +3058,11 @@ function renderRuns(){
   // ── Plan vs actual deviation ──────────────────────────────
   var planData = loadPlan();
   var planWkKm=[], actWkKm=[], planWkHm=[], actWkHm=[], wkLabels=[];
+  // HR target per session type (weighted zone midpoints)
+  var HR_TARGET = {EL:103, M:120, IL:120, HI:112, LL:103, LLH:108, BTB:108, SIM:112, R:103};
+  var PLAN_START = '2026-04-01';
   if(planData){
     planData.forEach(function(wk){
-      var wkStart = wk.sessions[0]&&wk.sessions[0].date;
-      var wkEnd   = wk.sessions[6]&&wk.sessions[6].date;
       var actKm=0, actHm=0;
       wk.sessions.forEach(function(s){
         if(s.actualKm) actKm+=s.actualKm;
@@ -3072,6 +3073,74 @@ function renderRuns(){
       planWkHm.push(wk.targetHm);
       actWkHm.push(Math.round(actHm));
       wkLabels.push('W'+wk.wk);
+    });
+  }
+
+  // ── Build detailed Soll/Ist rows for weeks from PLAN_START ────
+  var planTableRows = '';
+  if(planData){
+    var today = new Date().toISOString().slice(0,10);
+    var phaseCol = {Basis:'#33ddff',Aufbau:'#1affa0','Build I':'#ffe566','Build II':'#ffaa55',Build:'#ffe566',Deload:'#33ddff',Peak:'#ffaa55',Taper:'#a898ff'};
+    planData.forEach(function(wk){
+      var dates = wk.sessions.map(function(s){return s.date;}).sort();
+      if(dates[dates.length-1] < PLAN_START) return; // skip weeks fully before April 1
+      var dateFrom = dates[0], dateTo = dates[dates.length-1];
+      var fmt = function(d){ var p=d.split('-'); return p[2]+'.'+p[1]+'.'; };
+      var col = phaseCol[wk.phase]||'#a898ff';
+      var isFuture = dates[0] > today;
+      var isCur = dates[0] <= today && dateTo >= today;
+
+      // Ist km + Hm from plan (already synced with health data)
+      var istKm=0, istHm=0, hrSum=0, hrCnt=0, sollHrSum=0, sollHrDur=0;
+      var doneSess=0, totalSess=0;
+      wk.sessions.forEach(function(s){
+        if(s.type==='R' && !s.distKm) return; // skip rest placeholders
+        totalSess++;
+        var hr = HR_TARGET[s.type]||103;
+        sollHrSum += hr * (s.durationMin||60);
+        sollHrDur += (s.durationMin||60);
+        if(s.status==='done'){
+          doneSess++;
+          istKm += s.actualKm||0;
+          istHm += s.actualHm||0;
+          // get HR: prefer actualHr, else look up matching run in ALL_WORKOUTS
+          var hr_ist = s.actualHr;
+          if(!hr_ist){
+            var match = runs.filter(function(r){
+              return new Date(r.startMs).toISOString().slice(0,10)===s.date && r.hrMean;
+            })[0];
+            if(match) hr_ist = match.hrMean;
+          }
+          if(hr_ist){ hrSum+=hr_ist; hrCnt++; }
+        }
+      });
+      var sollHr = sollHrDur ? Math.round(sollHrSum/sollHrDur) : null;
+      var istHr  = hrCnt ? Math.round(hrSum/hrCnt) : null;
+      var dKm    = istKm - wk.targetVol;
+      var dHm    = istHm - wk.targetHm;
+      var compliance = totalSess ? doneSess/totalSess : 0;
+      var compCol = compliance>=1?'#1affa0':compliance>=.5?'#ffe566':isFuture?'var(--dim)':'#ff5577';
+      var rowBg = isCur ? 'rgba(168,152,255,.06)' : 'transparent';
+      var dimFuture = isFuture ? 'opacity:.55' : '';
+
+      planTableRows += '<tr style="background:'+rowBg+';border-top:1px solid rgba(255,255,255,.05);'+dimFuture+'">'
+        +'<td style="padding:7px 8px;white-space:nowrap;font-weight:700;color:'+(isCur?'var(--accent)':'var(--txt)')+'">W'+wk.wk+(isCur?' ←':'')+'</td>'
+        +'<td style="padding:7px 8px;white-space:nowrap;font-size:11px;color:var(--dim)">'+fmt(dateFrom)+'–'+fmt(dateTo)+'</td>'
+        +'<td style="padding:7px 8px"><span style="color:'+col+';font-size:11px;font-weight:700">'+wk.phase+'</span></td>'
+        // km
+        +'<td style="padding:7px 8px;text-align:right;color:var(--dim)">'+wk.targetVol+'</td>'
+        +'<td style="padding:7px 8px;text-align:right;font-weight:700;color:'+(istKm>0?'var(--white)':'var(--dim)')+'">'+( istKm>0?istKm.toFixed(1):'–')+'</td>'
+        +'<td style="padding:7px 8px;text-align:right;font-weight:700;color:'+(istKm>0?(dKm>=-2?'#1affa0':dKm>=-8?'#ffe566':'#ff5577'):'var(--dim)')+'">'+( istKm>0?(dKm>=0?'+':'')+dKm.toFixed(1):'–')+'</td>'
+        // hm
+        +'<td style="padding:7px 8px;text-align:right;color:var(--dim)">'+(wk.targetHm||'–')+'</td>'
+        +'<td style="padding:7px 8px;text-align:right;font-weight:700;color:'+(istHm>0?'var(--white)':'var(--dim)')+'">'+( istHm>0?istHm:'–')+'</td>'
+        +'<td style="padding:7px 8px;text-align:right;font-weight:700;color:'+(istHm>0?(dHm>=-50?'#1affa0':dHm>=-200?'#ffe566':'#ff5577'):'var(--dim)')+'">'+( istHm>0?(dHm>=0?'+':'')+dHm:'–')+'</td>'
+        // hf
+        +'<td style="padding:7px 8px;text-align:right;color:var(--dim)">'+(sollHr||'–')+'</td>'
+        +'<td style="padding:7px 8px;text-align:right;font-weight:700;color:'+(istHr?( istHr<=sollHr+5?'#1affa0':istHr<=sollHr+12?'#ffe566':'#ff5577'):'var(--dim)')+'">'+( istHr||'–')+'</td>'
+        // sessions
+        +'<td style="padding:7px 8px;text-align:right;font-weight:700;color:'+compCol+'">'+doneSess+'/'+totalSess+'</td>'
+        +'</tr>';
     });
   }
 
@@ -3131,16 +3200,45 @@ function renderRuns(){
     </div>
   </div>
 
-  <!-- Plan vs Ist Kurve -->
-  ${planData?`
+  <!-- Plan vs Ist Tabelle ab 1. April 2026 -->
+  ${planData && planTableRows ? `
   <div class="card" style="margin-bottom:14px">
-    <div class="card-title">📈 Trainingsplan: Soll vs. Ist (km/Woche)</div>
-    <div class="chart-wrap h160"><canvas id="planVsActCanvas"></canvas></div>
-    <div style="display:flex;gap:16px;justify-content:center;margin-top:8px;font-size:11px">
-      <span style="color:var(--accent)">■ Soll-km</span>
-      <span style="color:var(--green)">■ Ist-km</span>
+    <div class="card-title">📈 Trainingsplan: Soll vs. Ist (ab 1. April 2026)</div>
+    <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="color:var(--dim);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">
+          <th style="padding:5px 8px;text-align:left">Wo.</th>
+          <th style="padding:5px 8px;text-align:left">Datum</th>
+          <th style="padding:5px 8px;text-align:left">Phase</th>
+          <th style="padding:5px 8px;text-align:right" colspan="3">── km ──────</th>
+          <th style="padding:5px 8px;text-align:right" colspan="3">── Hm ──────</th>
+          <th style="padding:5px 8px;text-align:right" colspan="2">── Ø HF ──</th>
+          <th style="padding:5px 8px;text-align:right">EH</th>
+        </tr>
+        <tr style="color:var(--dim);font-size:10px;font-weight:600">
+          <th></th><th></th><th></th>
+          <th style="padding:3px 8px;text-align:right">Soll</th>
+          <th style="padding:3px 8px;text-align:right">Ist</th>
+          <th style="padding:3px 8px;text-align:right">Δ</th>
+          <th style="padding:3px 8px;text-align:right">Soll</th>
+          <th style="padding:3px 8px;text-align:right">Ist</th>
+          <th style="padding:3px 8px;text-align:right">Δ</th>
+          <th style="padding:3px 8px;text-align:right">Soll</th>
+          <th style="padding:3px 8px;text-align:right">Ist</th>
+          <th style="padding:3px 8px;text-align:right">✓</th>
+        </tr>
+      </thead>
+      <tbody>${planTableRows}</tbody>
+    </table>
     </div>
-  </div>`:''}
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:10px;color:var(--dim)">
+      <span><span style="color:#1affa0">■</span> auf Plan / besser</span>
+      <span><span style="color:#ffe566">■</span> leicht unter Plan</span>
+      <span><span style="color:#ff5577">■</span> deutlich unter Plan</span>
+      <span style="margin-left:8px">EH = Einheiten erledigt/geplant · Ø HF Soll = gewichteter Zonenmittelwert</span>
+    </div>
+  </div>` : ''}
 
   <!-- Monatliche km + Hm -->
   <div class="card" style="margin-bottom:14px">
@@ -3190,18 +3288,6 @@ function renderRuns(){
     var cOpts = {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
       scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#9898c0',font:{size:10}}},
                y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#9898c0',font:{size:10}}}}};
-
-    // Plan vs Actual
-    if(planData && document.getElementById('planVsActCanvas')){
-      charts['runsPlvA'] = new Chart(document.getElementById('planVsActCanvas'),{type:'bar',data:{
-        labels:wkLabels,
-        datasets:[
-          {label:'Soll',data:planWkKm,backgroundColor:'rgba(168,152,255,.3)',borderColor:'#a898ff',borderWidth:1,borderRadius:3},
-          {label:'Ist', data:actWkKm, backgroundColor:'rgba(26,255,160,.4)',borderColor:'#1affa0',borderWidth:1,borderRadius:3,
-           type:'line',fill:false,tension:.3,pointRadius:3}
-        ]
-      },options:Object.assign({},cOpts,{plugins:{legend:{display:false}}})});
-    }
 
     // Monthly km bars
     var sortedM = Object.keys(byMonth).sort().slice(-14);
