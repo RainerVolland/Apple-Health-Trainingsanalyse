@@ -778,9 +778,15 @@ async function precomputeElevation(){
       elevIdx++;
       const {file, utcMs, workout} = toElevate[idx];
       try{
+        // Apple Health elevation (barometric, pre-smoothed) takes priority over GPX calculation
+        const hasAppleElevation = workout.elevationM > 0;
         const text = await file.text();
-        const ele  = parseGPXElevationOnly(text);
-        if(ele){
+        const ele  = hasAppleElevation ? null : parseGPXElevationOnly(text);
+        if(hasAppleElevation){
+          matched++; // Apple data already set during XML parse — just count it
+          const c = newCache[file.name];
+          if(c){ c.g = workout.elevationM; c.l = workout.elevationDown||0; }
+        } else if(ele){
           workout.elevationM    = ele.gain;
           workout.elevationDown = ele.loss;
           matched++;
@@ -922,17 +928,22 @@ async function streamParse(file,maxHR,onProgress){
       const localEpoch=pLocalEpoch(startDateStr);
       const dur=parseFloat(ga(as,'duration'))||0;
       if(!sMs||dur<=0)continue;
-      let cal=0,dist=0,ip=0;
+      let cal=0,dist=0,elevUp=0,elevDown=0,ip=0;
       while(true){
         const ss=inn.indexOf('<WorkoutStatistics ',ip);if(ss<0)break;
         const se=inn.indexOf('>',ss);if(se<0)break;ip=se+1;
         const sa=inn.slice(ss+19,se),st=ga(sa,'type');
         if(st==='HKQuantityTypeIdentifierActiveEnergyBurned')cal=parseFloat(ga(sa,'sum'))||0;
         if(st==='HKQuantityTypeIdentifierDistanceWalkingRunning')dist=parseFloat(ga(sa,'sum'))||0;
+        // Apple Watch barometric altimeter — already smoothed by Apple, same as Health app
+        if(st==='HKQuantityTypeIdentifierElevationAscended') elevUp  =parseFloat(ga(sa,'sum'))||0;
+        if(st==='HKQuantityTypeIdentifierElevationDescended')elevDown=parseFloat(ga(sa,'sum'))||0;
       }
       const d=new Date(sMs);
       workouts.push({type:pn(raw),startMs:sMs,endMs:eMs||sMs+dur*60000,
         durationMin:dur,calories:cal,distanceKm:dist,
+        elevationM:   elevUp   > 0 ? Math.round(elevUp)   : null,
+        elevationDown:elevDown > 0 ? Math.round(elevDown) : null,
         weekday:DAYS_EN[d.getDay()],hour:d.getHours(),month:toYM(sMs),year:d.getFullYear(),localEpoch,
         hrMean:null,hrMin:null,hrMax:null,z1:null,z2:null,z3:null,z4:null,z5:null});
     }
