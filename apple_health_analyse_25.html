@@ -429,7 +429,7 @@ function showUpload(){
 // ═══════════════════════════════════════════════════════════
 
 // Bump this string whenever cached workout structure changes (forces one-time re-import)
-var WORKOUT_CACHE_VERSION = 'v3-appleElev';
+var WORKOUT_CACHE_VERSION = 'v4-metaElev';
 
 function initUploadUI(){
   // ── First: check if we have valid cached data → show welcome screen ───────
@@ -943,25 +943,28 @@ async function streamParse(file,maxHR,onProgress){
       const dur=parseFloat(ga(as,'duration'))||0;
       if(!sMs||dur<=0)continue;
       let cal=0,dist=0,elevUp=0,elevDown=0,ip=0;
-      const _dbgTypes=[];
       while(true){
         const ss=inn.indexOf('<WorkoutStatistics ',ip);if(ss<0)break;
         const se=inn.indexOf('>',ss);if(se<0)break;ip=se+1;
         const sa=inn.slice(ss+19,se),st=ga(sa,'type');
-        _dbgTypes.push(st);
         if(st==='HKQuantityTypeIdentifierActiveEnergyBurned')cal=parseFloat(ga(sa,'sum'))||0;
         if(st==='HKQuantityTypeIdentifierDistanceWalkingRunning')dist=parseFloat(ga(sa,'sum'))||0;
-        if(st==='HKQuantityTypeIdentifierElevationAscended') elevUp  =parseFloat(ga(sa,'sum'))||0;
-        if(st==='HKQuantityTypeIdentifierElevationDescended')elevDown=parseFloat(ga(sa,'sum'))||0;
       }
-      // Debug: log full details for workouts from the last 7 days
-      if(sMs > Date.now() - 7*24*3600*1000){
-        console.group('🔍 Recent workout: '+startDateStr+' | type='+raw+' | dist='+dist+'km');
-        console.log('WorkoutStatistics types found:', _dbgTypes.length ? _dbgTypes : ['(none)']);
-        console.log('Parsed values: cal='+cal+' dist='+dist+' elevUp='+elevUp+' elevDown='+elevDown);
-        console.log('Full inn XML:\n'+inn);
-        console.groupEnd();
-      }
+      // Apple Watch barometric elevation is stored as MetadataEntry, e.g. value="145022 cm"
+      const parseMetaElev = key => {
+        const kp = inn.indexOf('key="'+key+'"');
+        if(kp < 0) return 0;
+        const ts = inn.lastIndexOf('<MetadataEntry ', kp);
+        const te = inn.indexOf('>', ts);
+        if(ts < 0 || te < 0) return 0;
+        const raw = ga(inn.slice(ts+15, te), 'value');
+        const sp = raw.indexOf(' ');
+        const num = parseFloat(sp>=0 ? raw.slice(0,sp) : raw) || 0;
+        const unit = sp>=0 ? raw.slice(sp+1).trim() : 'm';
+        return unit==='cm' ? num/100 : num;
+      };
+      elevUp   = parseMetaElev('HKElevationAscended');
+      elevDown = parseMetaElev('HKElevationDescended');
       const d=new Date(sMs);
       workouts.push({type:pn(raw),startMs:sMs,endMs:eMs||sMs+dur*60000,
         durationMin:dur,calories:cal,distanceKm:dist,
