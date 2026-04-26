@@ -943,15 +943,22 @@ async function streamParse(file,maxHR,onProgress){
       const dur=parseFloat(ga(as,'duration'))||0;
       if(!sMs||dur<=0)continue;
       let cal=0,dist=0,elevUp=0,elevDown=0,ip=0;
+      const _dbgTypes=[];
       while(true){
         const ss=inn.indexOf('<WorkoutStatistics ',ip);if(ss<0)break;
         const se=inn.indexOf('>',ss);if(se<0)break;ip=se+1;
         const sa=inn.slice(ss+19,se),st=ga(sa,'type');
+        _dbgTypes.push(st);
         if(st==='HKQuantityTypeIdentifierActiveEnergyBurned')cal=parseFloat(ga(sa,'sum'))||0;
         if(st==='HKQuantityTypeIdentifierDistanceWalkingRunning')dist=parseFloat(ga(sa,'sum'))||0;
-        // Apple Watch barometric altimeter — already smoothed by Apple, same as Health app
         if(st==='HKQuantityTypeIdentifierElevationAscended') elevUp  =parseFloat(ga(sa,'sum'))||0;
         if(st==='HKQuantityTypeIdentifierElevationDescended')elevDown=parseFloat(ga(sa,'sum'))||0;
+      }
+      // Debug: log first outdoor workout's statistics types once
+      if(!window._elevDbgDone && dist>5){
+        console.log('📊 WorkoutStatistics types found in first outdoor workout:',_dbgTypes);
+        console.log('   elevUp='+elevUp+' elevDown='+elevDown+' inn-snippet:',inn.slice(0,500));
+        window._elevDbgDone=true;
       }
       const d=new Date(sMs);
       workouts.push({type:pn(raw),startMs:sMs,endMs:eMs||sMs+dur*60000,
