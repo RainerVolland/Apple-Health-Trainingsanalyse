@@ -1729,7 +1729,20 @@ function renderHR(){
 
 const RACE_DATE  = new Date('2026-07-30');
 const PLAN_START = new Date('2026-04-20'); // Week starts Monday Apr 20
-const PLAN_KEY   = 'ultra100k_plan_v6';  // v6: elevated hm targets, Sa 1200hm
+const PLAN_KEY   = 'ultra100k_plan_v7';  // v7: HI only weekends/holidays, Soll/Ist, zones
+
+// ── Bayerische Feiertage 2026 ────────────────────────────────────────────────
+const BAVARIAN_HOLIDAYS = new Set([
+  '2026-01-01','2026-01-06','2026-04-03','2026-04-06',
+  '2026-05-01','2026-05-14','2026-05-24','2026-05-25',
+  '2026-06-04','2026-08-15','2026-10-03','2026-11-01',
+  '2026-12-25','2026-12-26',
+]);
+function isBavarianHoliday(d){ return BAVARIAN_HOLIDAYS.has(d); }
+function isWeekendOrHoliday(dateStr){
+  const dow=new Date(dateStr).getDay();
+  return dow===0||dow===6||isBavarianHoliday(dateStr);
+}
 
 // ── Plan persistence (localStorage) ─────────────────────────────────────────
 function savePlan(data){ try{ localStorage.setItem(PLAN_KEY, JSON.stringify(data)); }catch(_){console.warn('localStorage not available');} }
@@ -1744,17 +1757,37 @@ const PHASES = [
   {name:'Taper',   color:'#a898ff', weeks:[14,15],     desc:'Regeneration & Schärfe'},
 ];
 
-// ── Session types ────────────────────────────────────────────────────────────
+// ── Session types — with HR zone breakdown (MaxHR = 159 bpm) ─────────────────
+// Z1 <95 | Z2 95-111 | Z3 112-127 | Z4 127-143 | Z5 >143
 const ST = {
-  EL:  {label:'Easy',       emoji:'🟢', desc:'Locker, Z1-Z2, Gespräch möglich'},
-  M:   {label:'Medium',     emoji:'🔵', desc:'Mittleres Tempo, Z2-Z3'},
-  IL:  {label:'Intervall',  emoji:'🟡', desc:'Qualität, Z4 Intervalle'},
-  HI:  {label:'Hills',      emoji:'⛰️', desc:'Bergläufe, Kraft & Höhenmeter'},
-  LL:  {label:'Long Run',   emoji:'🟠', desc:'Langer Lauf, Z2 diszipliniert'},
-  LLH: {label:'Long+Hm',   emoji:'🔴', desc:'Langer Lauf mit Höhenmetern'},
-  R:   {label:'Rest',       emoji:'⚪', desc:'Ruhe oder Mobilität'},
-  BTB: {label:'Back2Back',  emoji:'🟣', desc:'2 Tage lang hintereinander'},
-  SIM: {label:'Simulation', emoji:'🏆', desc:'Renn-Simulation, Ausrüstung & Ernährung testen'},
+  EL:  {label:'Easy',      emoji:'🟢', desc:'Locker, Z1-Z2 · Unterhaltung problemlos möglich',
+        zones:[{z:'Z2',bpm:'95–111 bpm',pct:90,col:'#1affa0',tip:'Einlaufen + Hauptblock · ~6.8–7.2 min/km · PULS ist der Chef'},
+               {z:'Z1',bpm:'<95 bpm',  pct:10,col:'#33ddff',tip:'Auslaufen / letzter km'}]},
+  M:   {label:'Medium',   emoji:'🔵', desc:'Mittleres Tempo, Z2–Z3 · aerober Aufbau',
+        zones:[{z:'Z2',bpm:'95–111 bpm', pct:25,col:'#1affa0',tip:'Einlaufen 15 min'},
+               {z:'Z3',bpm:'112–127 bpm',pct:65,col:'#33ddff',tip:'Hauptblock · ~6.0–6.5 min/km'},
+               {z:'Z2',bpm:'95–111 bpm', pct:10,col:'#1affa0',tip:'Auslaufen 6 min'}]},
+  IL:  {label:'Intervall', emoji:'🟡', desc:'Qualität · 6×5 min Z4 mit Pausen',
+        zones:[{z:'Z2',bpm:'95–111 bpm', pct:25,col:'#1affa0',tip:'Einlaufen 15 min locker'},
+               {z:'Z4',bpm:'127–143 bpm',pct:50,col:'#ffe566',tip:'6 × 5 min hart · 2 min Trabpause dazwischen'},
+               {z:'Z2',bpm:'95–111 bpm', pct:25,col:'#1affa0',tip:'Auslaufen 10–15 min'}]},
+  HI:  {label:'Hills',    emoji:'⛰️', desc:'Bergläufe · NUR Wochenende/Feiertage · RPE steuert!',
+        zones:[{z:'Z2',   bpm:'95–111 bpm',  pct:35,col:'#1affa0',tip:'Bergab & Flach · normaler Easy-Puls'},
+               {z:'RPE 5–6',bpm:'Z3–Z4 bergauf',pct:65,col:'#ffaa55',tip:'Bergauf: Puls darf steigen · RPE «kurze Sätze ok» · ab 12% Steigung: GEHEN!'}]},
+  LL:  {label:'Long Run', emoji:'🟠', desc:'Langer Lauf · Z2 diszipliniert bis km 30+',
+        zones:[{z:'Z2',bpm:'95–111 bpm', pct:85,col:'#1affa0',tip:'Grundtempo · ~6.5–7.0 min/km · Gel alle 45 min'},
+               {z:'Z3',bpm:'112–127 bpm',pct:15,col:'#33ddff',tip:'Letzte 15% ok wenn Beine tragen'}]},
+  LLH: {label:'Long+Hm', emoji:'🔴', desc:'Langer Lauf mit Höhenmetern · Haupteinheit der Woche',
+        zones:[{z:'Z2',     bpm:'95–111 bpm',   pct:55,col:'#1affa0',tip:'Flach & bergab · 6.5–7.5 min/km'},
+               {z:'RPE 5–6',bpm:'Z3–Z4 bergauf', pct:45,col:'#ffaa55',tip:'Bergauf RPE steuert · Stöcke ab 25 km ok · GEHEN = Ultra-Strategie'}]},
+  R:   {label:'Rest',    emoji:'⚪', desc:'Ruhe oder aktive Mobilität', zones:[]},
+  BTB: {label:'Back2Back',emoji:'🟣', desc:'2 Tage hintereinander · Tag 2 bewusst müde',
+        zones:[{z:'Z2',     bpm:'95–111 bpm',   pct:60,col:'#1affa0',tip:'Tag 1: Normal · Tag 2: Auch wenn Alarm-Lampen leuchten'},
+               {z:'RPE 5–6',bpm:'bergauf RPE',   pct:40,col:'#ffaa55',tip:'Tag 2 darf langsamer sein — das ist der Sinn!'}]},
+  SIM: {label:'Simulation',emoji:'🏆', desc:'Renn-Simulation · komplette Rennausrüstung · 5:00h Start',
+        zones:[{z:'Z2',bpm:'95–111 bpm',  pct:55,col:'#1affa0',tip:'Erste 25 km · genau wie Renntag · Gel alle 40 min'},
+               {z:'Z3',bpm:'112–127 bpm', pct:30,col:'#33ddff',tip:'Km 25–35 · Tempo halten'},
+               {z:'Z3–4',bpm:'112–143 bpm',pct:15,col:'#ffaa55',tip:'Finale ab km 35 · Mentale Simulation: «Ich bin im Rennen»'}]},
 };
 
 // ── ATHLETE PROFILE — aus Health-Daten abgeleitet ──────────────────────────
@@ -1892,6 +1925,9 @@ function generatePlan(profile){
       const isWeekend = di>=5;
       const isLong = ['LL','LLH','BTB','SIM'].includes(type);
       let time='05:30', durationMin=60, distKm=0, hmTarget=0;
+
+      // Hills only on weekends/holidays — downgrade weekday HI to intervals
+      if(type==='HI' && !isWeekendOrHoliday(d.toISOString().slice(0,10))) type='IL';
 
       if(type==='R'){ durationMin=0; time='-'; }
       else if(isWeekend){
@@ -2043,18 +2079,63 @@ function syncPlanWithHealthData(planData){
   return planData;
 }
 
-// ── Notion Calendar Export ────────────────────────────────────────────────────
+// ── Notion / Kalender Export ──────────────────────────────────────────────────
 function exportPlanToNotion(planData){
-  const rows=[['Datum','Tag','Woche','Phase','Einheit','Typ','Dauer (min)','Ziel-km','Ziel-Hm','Uhrzeit','Notiz']];
+  // CSV für Notion-Datenbank Import
+  const rows=[['Datum','Tag','Woche','Phase','Einheit','Typ','Dauer (min)','Ziel-km','Ziel-Hm','Uhrzeit','HF-Zonen','Notiz']];
   planData.forEach(wk=>{
     wk.sessions.forEach(s=>{
-      const sType=ST[s.type]||{label:s.type,emoji:'▪️'};
+      if(s.type==='R') return;
+      const sType=ST[s.type]||{label:s.type,emoji:'▪️',zones:[]};
+      const zones=(sType.zones||[]).map(z=>`${z.z} ${z.bpm} (${Math.round(z.pct*(s.durationMin||60)/100)}min)`).join(' | ');
       rows.push([s.date,s.dayLabel,`Woche ${wk.wk}`,wk.phase,sType.emoji+' '+sType.label,s.type,
-        s.durationMin||'',s.distKm||'',s.hmTarget||'',s.time,wk.note]);
+        s.durationMin||'',s.distKm||'',s.hmTarget||'',s.time,zones,wk.note]);
     });
   });
   const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  dlFile('ultraplan_notion_kalender.csv','\uFEFF'+csv,'text/csv;charset=utf-8');
+  dlFile('ultraplan_notion_kalender.csv','﻿'+csv,'text/csv;charset=utf-8');
+}
+
+function exportPlanToICal(planData){
+  // iCal Export — direkt in Notion Calendar / Apple Kalender importierbar
+  const esc=s=>String(s||'').replace(/[\\;,]/g,'\\$&').replace(/\n/g,'\\n');
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Ultra100k Training//DE',
+    'CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Ultra 100k Training',
+    'X-WR-TIMEZONE:Europe/Berlin'];
+  planData.forEach(wk=>{
+    wk.sessions.forEach(s=>{
+      if(s.type==='R') return;
+      const sType=ST[s.type]||{label:s.type,emoji:'▪️',zones:[]};
+      const [h,m]=(s.time||'05:30').split(':').map(Number);
+      // CEST (Apr–Oct) = UTC+2
+      const utcH=h-2; const pad=n=>String(n).padStart(2,'0');
+      const dateStr=s.date.replace(/-/g,'');
+      const dtStart=`${dateStr}T${pad(utcH)}${pad(m)}00Z`;
+      const endMin=h*60+m+(s.durationMin||60);
+      const eH=Math.floor(endMin/60)-2, eM=endMin%60;
+      const dtEnd=`${dateStr}T${pad(eH)}${pad(eM)}00Z`;
+      const zones=(sType.zones||[]).map(z=>{
+        const dur=Math.round(z.pct*(s.durationMin||60)/100);
+        return `${z.z} (${z.bpm}): ${dur} min — ${z.tip}`;
+      }).join('\\n');
+      const summary=`${sType.emoji} ${sType.label} – W${wk.wk} ${wk.phase}`;
+      const desc=[
+        `Ziel: ${s.durationMin}min${s.distKm?' · '+s.distKm+'km':''}${s.hmTarget?' · '+s.hmTarget+'hm':''}`,
+        `Phase: ${wk.phase} · ${wk.note}`,
+        zones?'\\n── HF-Zonen ──\\n'+zones:'',
+        wk.tips?'\\n💡 '+wk.tips:''
+      ].filter(Boolean).join('\\n');
+      lines.push('BEGIN:VEVENT',
+        `DTSTART:${dtStart}`,`DTEND:${dtEnd}`,
+        `SUMMARY:${esc(summary)}`,
+        `DESCRIPTION:${esc(desc)}`,
+        `UID:${s.date}-${s.type}-w${wk.wk}@ultra100k`,
+        `CATEGORIES:Training,Ultra100k`,
+        'END:VEVENT');
+    });
+  });
+  lines.push('END:VCALENDAR');
+  dlFile('ultraplan_kalender.ics',lines.join('\r\n'),'text/calendar;charset=utf-8');
 }
 
 // ── Import workouts.json and sync with plan ──────────────────────────────────
@@ -2275,13 +2356,70 @@ function renderPlan(){
     </div>
   </div>
 
+  <!-- Soll/Ist Analyse -->
+  <div class="card" style="padding:16px 20px;margin-bottom:14px">
+    <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:12px">📊 Soll / Ist Analyse</div>
+    <!-- Legend -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:10px 12px;background:rgba(255,255,255,.03);border-radius:8px">
+      <span style="font-size:11px;font-weight:700;color:var(--dim)">Legende:</span>
+      <span style="font-size:11px;display:flex;align-items:center;gap:4px"><span style="background:rgba(26,255,160,.15);border-radius:4px;padding:2px 7px;color:#1affa0;font-weight:700">✅ grün</span> Einheit absolviert</span>
+      <span style="font-size:11px;display:flex;align-items:center;gap:4px"><span style="background:rgba(255,85,119,.12);border-radius:4px;padding:2px 7px;color:#ff5577;font-weight:700">❌ rot</span> Einheit verpasst</span>
+      <span style="font-size:11px;display:flex;align-items:center;gap:4px"><span style="background:var(--accent);border-radius:4px;padding:2px 7px;color:#fff;font-weight:700">● lila</span> Heute</span>
+      <span style="font-size:11px;display:flex;align-items:center;gap:4px"><span style="background:rgba(255,255,255,.07);border-radius:4px;padding:2px 7px;color:var(--dim);font-weight:700">○ grau</span> Geplant (Zukunft)</span>
+    </div>
+    <!-- Soll/Ist Tabelle — nur vergangene + aktuelle Wochen -->
+    <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="color:var(--dim);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">
+          <th style="text-align:left;padding:4px 8px">Wo.</th>
+          <th style="text-align:left;padding:4px 8px">Phase</th>
+          <th style="text-align:right;padding:4px 8px;white-space:nowrap">Soll km</th>
+          <th style="text-align:right;padding:4px 8px;white-space:nowrap">Ist km</th>
+          <th style="text-align:right;padding:4px 8px;white-space:nowrap">Δ km</th>
+          <th style="text-align:right;padding:4px 8px;white-space:nowrap">Soll hm</th>
+          <th style="text-align:right;padding:4px 8px;white-space:nowrap">Ist hm</th>
+          <th style="text-align:right;padding:4px 8px;white-space:nowrap">Einheiten</th>
+        </tr>
+      </thead>
+      <tbody>
+      ${planData.filter(wk=>wk.sessions.some(s=>s.date<=today)).map(wk=>{
+        const wkSess=wk.sessions.filter(s=>s.type!=='R');
+        const done=wkSess.filter(s=>s.status==='done');
+        const istKm=done.reduce((s,x)=>s+(x.actualKm||0),0);
+        const istHm=done.reduce((s,x)=>s+(x.actualHm||0),0);
+        const dKm=istKm-wk.targetVol;
+        const isCur=wk.wk===curWk;
+        const phaseColors={Basis:'#33ddff',Aufbau:'#1affa0',Build:'#ffe566',Peak:'#ffaa55',Taper:'#a898ff'};
+        const col=phaseColors[wk.phase]||'#a898ff';
+        const compliance=wkSess.length?done.length/wkSess.length:0;
+        const rowBg=isCur?'rgba(168,152,255,.05)':'transparent';
+        return `<tr style="background:${rowBg};border-top:1px solid rgba(255,255,255,.05)">
+          <td style="padding:6px 8px;font-weight:700;color:${isCur?'var(--accent)':'var(--txt)'}">W${wk.wk}${isCur?' ←':''}</td>
+          <td style="padding:6px 8px"><span style="color:${col};font-weight:700;font-size:11px">${wk.phase}</span></td>
+          <td style="text-align:right;padding:6px 8px;color:var(--dim)">${wk.targetVol}</td>
+          <td style="text-align:right;padding:6px 8px;font-weight:700;color:${istKm>0?'var(--white)':'var(--dim)'}">${istKm>0?istKm.toFixed(1):'–'}</td>
+          <td style="text-align:right;padding:6px 8px;font-weight:700;color:${dKm>=0?'#1affa0':dKm>-5?'#ffe566':'#ff5577'}">${istKm>0?(dKm>=0?'+':'')+dKm.toFixed(1):'–'}</td>
+          <td style="text-align:right;padding:6px 8px;color:var(--dim)">${wk.targetHm}</td>
+          <td style="text-align:right;padding:6px 8px;font-weight:700;color:${istHm>0?'var(--white)':'var(--dim)'}">${istHm>0?istHm:'–'}</td>
+          <td style="text-align:right;padding:6px 8px">
+            <span style="font-weight:700;color:${compliance>=1?'#1affa0':compliance>=.5?'#ffe566':'#ff5577'}">${done.length}/${wkSess.length}</span>
+          </td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table>
+    </div>
+  </div>
+
   <!-- Week-by-week table -->
   <div class="card" style="padding:16px 20px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
       <div style="font-size:13px;font-weight:700;color:var(--txt)">Wochenplan</div>
-      <div style="display:flex;gap:8px">
-        <button onclick="exportPlanToNotion(planState())" style="background:rgba(168,152,255,.12);border:1px solid rgba(168,152,255,.25);border-radius:8px;color:var(--accent);font-size:11px;padding:6px 12px;cursor:pointer;font-weight:700">📥 Notion CSV Export</button>
-        <button onclick="resetPlan()" style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--dim);font-size:11px;padding:6px 12px;cursor:pointer">🔄 Plan neu erstellen</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button onclick="exportPlanToICal(planState())" style="background:rgba(26,255,160,.1);border:1px solid rgba(26,255,160,.3);border-radius:8px;color:#1affa0;font-size:11px;padding:6px 12px;cursor:pointer;font-weight:700">📅 Kalender Export (.ics)</button>
+        <button onclick="exportPlanToNotion(planState())" style="background:rgba(168,152,255,.12);border:1px solid rgba(168,152,255,.25);border-radius:8px;color:var(--accent);font-size:11px;padding:6px 12px;cursor:pointer;font-weight:700">📥 Notion CSV</button>
+        <button onclick="resetPlan()" style="background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--dim);font-size:11px;padding:6px 12px;cursor:pointer">🔄 Neu erstellen</button>
       </div>
     </div>
     ${planData.map(wk=>{
@@ -2345,9 +2483,26 @@ function editSession(date){
   const sType=ST[session.type]||{emoji:'▪️',label:session.type};
   const overlay=document.getElementById('checkin-overlay');
   const content=document.getElementById('checkin-content');
+  const zoneHTML=(sType.zones||[]).length?`
+    <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px 12px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">HF-Zonen Soll</div>
+      ${(sType.zones||[]).map(z=>{
+        const dur=Math.round(z.pct*(session.durationMin||60)/100);
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:3px;height:30px;border-radius:2px;background:${z.col};flex-shrink:0"></div>
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:700;color:var(--white)">${z.z} · ${z.bpm} · ~${dur} min</div>
+            <div style="font-size:11px;color:var(--dim)">${z.tip}</div>
+          </div>
+          <div style="background:rgba(255,255,255,.07);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700;color:${z.col}">${z.pct}%</div>
+        </div>`;
+      }).join('')}
+    </div>`:'';
   content.innerHTML=`
     <div style="font-size:22px;margin-bottom:4px">${sType.emoji} ${sType.label}</div>
-    <div style="font-size:13px;color:var(--dim);margin-bottom:16px">${new Date(session.date).toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})} · ${session.time} Uhr · Ziel: ${session.durationMin}min${session.distKm?' · '+session.distKm+'km':''}</div>
+    <div style="font-size:12px;color:var(--dim);margin-bottom:4px">${sType.desc||''}</div>
+    <div style="font-size:13px;color:var(--dim);margin-bottom:14px">${new Date(session.date).toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})} · ${session.time} Uhr · Ziel: ${session.durationMin}min${session.distKm?' · '+session.distKm+'km':''}${session.hmTarget?' · '+session.hmTarget+'hm':''}</div>
+    ${zoneHTML}
     <div style="display:flex;gap:8px;margin-bottom:16px">
       <button onclick="setSessionStatus('${date}','done')" style="flex:1;background:rgba(26,255,160,.15);border:2px solid ${session.status==='done'?'#1affa0':'var(--border)'};border-radius:8px;color:#1affa0;padding:10px;font-weight:700;cursor:pointer">✅ Absolviert</button>
       <button onclick="setSessionStatus('${date}','missed')" style="flex:1;background:rgba(255,85,119,.1);border:2px solid ${session.status==='missed'?'#ff5577':'var(--border)'};border-radius:8px;color:#ff5577;padding:10px;font-weight:700;cursor:pointer">❌ Verpasst</button>
