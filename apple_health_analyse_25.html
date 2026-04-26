@@ -1339,7 +1339,8 @@ function renderGPX(text, workout){
 
   // Compute elevation gain+loss with smoothing (same algorithm as parseGPXElevationOnly)
   const hasEle=pts.some(p=>p.ele!==null);
-  if(workout && hasEle){
+  if(workout && hasEle && !(workout.elevationM > 0)){
+    // Only use GPX elevation when no Apple barometric data is available
     const elevArr=pts.filter(p=>p.ele!==null).map(p=>p.ele);
     const {gain,loss}=calcElevGainLoss(elevArr);
     if(gain>0){ workout.elevationM    = gain; }
