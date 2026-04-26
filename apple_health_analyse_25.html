@@ -649,26 +649,29 @@ function findGPX(workout){
 }
 
 // Elevation gain+loss from GPX text → {gain, loss} in meters
-// Smooth + threshold elevation calculation — same approach as Strava/Garmin.
-// Raw GPS elevation has ±3-5 m noise; without filtering gain is 1.5-2.5× reality.
-// Fix: 7-point moving average removes high-frequency noise, 5 m threshold removes the rest.
+// GPS altitude has long autocorrelation (minutes, not seconds).
+// 7-second smoothing removes nothing useful. Solution: 60-second window (Strava/Garmin standard)
+// + hysteresis threshold of 10 m so only real terrain changes are counted.
 function calcElevGainLoss(elevations){
   if(elevations.length < 2) return {gain:0, loss:0};
-  const W = 7;
-  const half = Math.floor(W/2);
+
+  // Step 1: 60-point moving average — removes both HF noise and autocorrelated GPS drift
+  const W = 60;
+  const half = 30;
   const smoothed = elevations.map((_,i)=>{
     const s=Math.max(0,i-half), e=Math.min(elevations.length,s+W);
     const sl=elevations.slice(s,e);
     return sl.reduce((a,v)=>a+v,0)/sl.length;
   });
-  const THRESHOLD = 5; // metres — only count changes ≥ 5 m
-  let gain=0, loss=0, prev=smoothed[0];
+
+  // Step 2: Hysteresis filter — reference only advances when change ≥ 10 m
+  // This prevents noise oscillations from accumulating into false gain.
+  const THRESHOLD = 10;
+  let gain=0, loss=0, ref=smoothed[0];
   for(let i=1;i<smoothed.length;i++){
-    const diff=smoothed[i]-prev;
-    if(Math.abs(diff)>=THRESHOLD){
-      if(diff>0) gain+=diff; else loss+=Math.abs(diff);
-      prev=smoothed[i];
-    }
+    const diff=smoothed[i]-ref;
+    if(diff >= THRESHOLD){ gain+=diff; ref=smoothed[i]; }
+    else if(diff <= -THRESHOLD){ loss+=Math.abs(diff); ref=smoothed[i]; }
   }
   return {gain:Math.round(gain), loss:Math.round(loss)};
 }
@@ -691,7 +694,7 @@ function parseGPXElevationOnly(text){
 // Value: {u: utcMs, g: elevGain, l: elevLoss}
 // First import: reads all files sequentially (same as original — fast, low GC pressure)
 // Subsequent imports: all known files resolved from cache instantly — only new files read
-const GPX_CACHE_KEY = 'gpxElevCache_v3'; // v3: smoothed elevation (7pt avg + 5m threshold)
+const GPX_CACHE_KEY = 'gpxElevCache_v4'; // v4: 60pt avg + 10m hysteresis (Strava/Garmin standard)
 function loadGpxCache(){ try{ const v=localStorage.getItem(GPX_CACHE_KEY); return v?JSON.parse(v):{}; }catch(_){ return {}; } }
 function saveGpxCache(c){ try{ localStorage.setItem(GPX_CACHE_KEY,JSON.stringify(c)); }catch(e){ console.warn('GPX cache save failed:',e.message); } }
 
@@ -2743,7 +2746,8 @@ function openCheckin(){
 function closeCheckin(){
   document.getElementById('checkin-overlay').style.display='none';
 }
-document.getElementById('checkin-overlay').addEventListener('click',e=>{
+const _overlay=document.getElementById('checkin-overlay');
+if(_overlay) _overlay.addEventListener('click',e=>{
   if(e.target===e.currentTarget) closeCheckin();
 });
 
