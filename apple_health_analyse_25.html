@@ -717,13 +717,23 @@ async function precomputeElevation(){
       fromCache++;
       newCache[file.name] = hit;
       if(hit.u) GPX_INDEX.set(hit.u, file);
-      if(hit.u && hit.g){
+      if(hit.u){
         let best=null, bestDiff=30*60*1000;
         for(const w of ALL_WORKOUTS){
           const d=Math.abs(w.startMs-hit.u);
           if(d<bestDiff){bestDiff=d;best=w;}
         }
-        if(best){ best.elevationM=hit.g; best.elevationDown=hit.l||0; matched++; }
+        if(best){
+          if(best.elevationM > 0){
+            // Apple Watch barometric data already set — update cache to reflect it
+            hit.g = best.elevationM; hit.l = best.elevationDown||0;
+            matched++;
+          } else if(hit.g){
+            // No Apple data — use cached GPX computation
+            best.elevationM = hit.g; best.elevationDown = hit.l||0;
+            matched++;
+          }
+        }
       }
     } else {
       uncached.push(file);
