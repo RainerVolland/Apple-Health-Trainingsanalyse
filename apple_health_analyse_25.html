@@ -639,22 +639,41 @@ function findGPX(workout){
 }
 
 // Elevation gain+loss from GPX text → {gain, loss} in meters
+// Smooth + threshold elevation calculation — same approach as Strava/Garmin.
+// Raw GPS elevation has ±3-5 m noise; without filtering gain is 1.5-2.5× reality.
+// Fix: 7-point moving average removes high-frequency noise, 5 m threshold removes the rest.
+function calcElevGainLoss(elevations){
+  if(elevations.length < 2) return {gain:0, loss:0};
+  const W = 7;
+  const half = Math.floor(W/2);
+  const smoothed = elevations.map((_,i)=>{
+    const s=Math.max(0,i-half), e=Math.min(elevations.length,s+W);
+    const sl=elevations.slice(s,e);
+    return sl.reduce((a,v)=>a+v,0)/sl.length;
+  });
+  const THRESHOLD = 5; // metres — only count changes ≥ 5 m
+  let gain=0, loss=0, prev=smoothed[0];
+  for(let i=1;i<smoothed.length;i++){
+    const diff=smoothed[i]-prev;
+    if(Math.abs(diff)>=THRESHOLD){
+      if(diff>0) gain+=diff; else loss+=Math.abs(diff);
+      prev=smoothed[i];
+    }
+  }
+  return {gain:Math.round(gain), loss:Math.round(loss)};
+}
+
 function parseGPXElevationOnly(text){
-  let gain=0,loss=0,prev=null;
+  const elevations=[];
   const re=/<ele>([^<]+)<\/ele>/g;
   let m;
   while((m=re.exec(text))!==null){
     const e=parseFloat(m[1]);
-    if(!isNaN(e)){
-      if(prev!==null){
-        const diff=e-prev;
-        if(diff>0) gain+=diff;
-        else       loss+=Math.abs(diff);
-      }
-      prev=e;
-    }
+    if(!isNaN(e)) elevations.push(e);
   }
-  return (gain>0||loss>0)?{gain:Math.round(gain),loss:Math.round(loss)}:null;
+  if(elevations.length<2) return null;
+  const {gain,loss}=calcElevGainLoss(elevations);
+  return (gain>0||loss>0)?{gain,loss}:null;
 }
 
 // ── GPX elevation cache (localStorage) ───────────────────────────────────────
@@ -662,7 +681,7 @@ function parseGPXElevationOnly(text){
 // Value: {u: utcMs, g: elevGain, l: elevLoss}
 // First import: reads all files sequentially (same as original — fast, low GC pressure)
 // Subsequent imports: all known files resolved from cache instantly — only new files read
-const GPX_CACHE_KEY = 'gpxElevCache_v2';
+const GPX_CACHE_KEY = 'gpxElevCache_v3'; // v3: smoothed elevation (7pt avg + 5m threshold)
 function loadGpxCache(){ try{ const v=localStorage.getItem(GPX_CACHE_KEY); return v?JSON.parse(v):{}; }catch(_){ return {}; } }
 function saveGpxCache(c){ try{ localStorage.setItem(GPX_CACHE_KEY,JSON.stringify(c)); }catch(e){ console.warn('GPX cache save failed:',e.message); } }
 
@@ -1271,18 +1290,13 @@ function renderGPX(text, workout){
   const pts=parseGPX(text);
   if(!pts.length){document.getElementById('routeInner').innerHTML='<div class="no-data" style="padding:20px">Keine GPS-Punkte in der Route gefunden.</div>';return;}
 
-  // Compute elevation gain+loss, store on workout, update stat cards
+  // Compute elevation gain+loss with smoothing (same algorithm as parseGPXElevationOnly)
   const hasEle=pts.some(p=>p.ele!==null);
   if(workout && hasEle){
-    let gain=0,loss=0;
-    for(let i=1;i<pts.length;i++){
-      if(pts[i].ele!==null&&pts[i-1].ele!==null){
-        const diff=pts[i].ele-pts[i-1].ele;
-        if(diff>0) gain+=diff; else loss+=Math.abs(diff);
-      }
-    }
-    if(gain>0){ workout.elevationM    = Math.round(gain); }
-    if(loss>0){ workout.elevationDown = Math.round(loss); }
+    const elevArr=pts.filter(p=>p.ele!==null).map(p=>p.ele);
+    const {gain,loss}=calcElevGainLoss(elevArr);
+    if(gain>0){ workout.elevationM    = gain; }
+    if(loss>0){ workout.elevationDown = loss; }
     // Inject elevation stat cards into already-rendered stat row
     const statRow = document.querySelector('#detailContent .stat-row');
     if(statRow){
