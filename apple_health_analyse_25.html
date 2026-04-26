@@ -677,7 +677,7 @@ async function precomputeElevation(){
   const cache    = loadGpxCache();
   const newCache = {};
 
-  // ── Pass 1: cache hits (no file reads) ───────────────────────────────────
+  // ── Pass 1a: cache hits — zero file reads ────────────────────────────────
   const uncached = [];
   for(const file of files){
     const hit = cache[file.name];
@@ -704,22 +704,21 @@ async function precomputeElevation(){
     await yF();
   }
 
-  // ── Pass 2: read uncached files with worker pool (12 concurrent) ──────────
-  // 12 concurrent readers: ~12× faster than sequential, no GC spike like Promise.all(all)
-  const CONCURRENCY = 12;
-  let nextIdx   = 0;
-  let processed = 0;
+  // ── Pass 1b: read only first 2 KB of each uncached file to get UTC timestamp
+  // Reading 2 KB instead of the full ~200 KB = ~100× less I/O for the index pass.
+  // 8 concurrent workers are safe here because each request is tiny.
+  const toElevate = [];   // {file, utcMs, workout} — only matched workouts need full read
+  let tsIdx = 0, tsProcessed = 0;
 
-  async function gpxWorker(){
+  async function timestampWorker(){
     while(true){
-      const idx = nextIdx;
+      const idx = tsIdx;
       if(idx >= uncached.length) break;
-      nextIdx++;
+      tsIdx++;
       const file = uncached[idx];
       try{
-        const text  = await file.text();
+        const text  = await file.slice(0, 2000).text();
         const utcMs = gpxFirstTrkptUtc(text);
-        const entry = {u: utcMs||null, g:0, l:0};
         if(utcMs){
           GPX_INDEX.set(utcMs, file);
           let best=null, bestDiff=30*60*1000;
@@ -727,27 +726,63 @@ async function precomputeElevation(){
             const d=Math.abs(w.startMs-utcMs);
             if(d<bestDiff){bestDiff=d;best=w;}
           }
-          if(best){
-            const ele=parseGPXElevationOnly(text);
-            if(ele){ best.elevationM=ele.gain; best.elevationDown=ele.loss; matched++; entry.g=ele.gain; entry.l=ele.loss; }
-          }
+          if(best) toElevate.push({file, utcMs, workout: best});
+          newCache[file.name] = {u: utcMs, g:0, l:0};
+        } else {
+          newCache[file.name] = {u: null, g:0, l:0};
         }
-        newCache[file.name] = entry;
       }catch(_){}
-      processed++;
-      if(processed % 40 === 0){
-        setProgress(91 + Math.round((fromCache+processed)/files.length*7),
-          `${fromCache>0?fromCache+' Cache ✓ · ':''}${processed}/${uncached.length} neue GPX…`,
-          `${matched} Höhenmeter zugeordnet`);
+      tsProcessed++;
+      if(tsProcessed % 80 === 0){
+        setProgress(91 + Math.round(tsProcessed/uncached.length*4),
+          `${fromCache>0?fromCache+' Cache ✓ · ':''}${tsProcessed}/${uncached.length} GPX indiziert…`,
+          `${toElevate.length} Workouts gefunden`);
         await yF();
       }
     }
   }
-  const workerCount = Math.min(CONCURRENCY, uncached.length||1);
-  await Promise.all(Array.from({length: workerCount}, gpxWorker));
+  if(uncached.length > 0){
+    await Promise.all(Array.from({length: Math.min(8, uncached.length)}, timestampWorker));
+  }
+
+  setProgress(95, `${toElevate.length} Workouts · Höhenmeter berechnen…`, `${toElevate.length} Dateien lesen`);
+  await yF();
+
+  // ── Pass 2: read full file only for matched workouts (typically ~30% of all files)
+  // 4 concurrent workers for the heavier full-file reads.
+  let elevIdx = 0;
+
+  async function elevationWorker(){
+    while(true){
+      const idx = elevIdx;
+      if(idx >= toElevate.length) break;
+      elevIdx++;
+      const {file, utcMs, workout} = toElevate[idx];
+      try{
+        const text = await file.text();
+        const ele  = parseGPXElevationOnly(text);
+        if(ele){
+          workout.elevationM    = ele.gain;
+          workout.elevationDown = ele.loss;
+          matched++;
+          const c = newCache[file.name];
+          if(c){ c.g = ele.gain; c.l = ele.loss; }
+        }
+      }catch(_){}
+      if(idx % 20 === 0){
+        setProgress(95 + Math.round(idx/Math.max(toElevate.length,1)*3),
+          `${idx}/${toElevate.length} Höhenmeter…`,
+          `${matched} Workouts mit Elevation`);
+        await yF();
+      }
+    }
+  }
+  if(toElevate.length > 0){
+    await Promise.all(Array.from({length: Math.min(4, toElevate.length)}, elevationWorker));
+  }
 
   saveGpxCache(newCache);
-  console.log(`✅ Elevation: ${matched} matched · ${fromCache}/${files.length} from cache · ${uncached.length} newly read`);
+  console.log(`✅ Elevation: ${matched} matched · ${fromCache}/${files.length} from cache · ${uncached.length} newly indexed · ${toElevate.length} elevation reads`);
 }
 
 // ═══════════════════════════════════════════════════════════
