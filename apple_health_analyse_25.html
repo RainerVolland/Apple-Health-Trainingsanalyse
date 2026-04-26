@@ -954,18 +954,13 @@ async function streamParse(file,maxHR,onProgress){
         if(st==='HKQuantityTypeIdentifierElevationAscended') elevUp  =parseFloat(ga(sa,'sum'))||0;
         if(st==='HKQuantityTypeIdentifierElevationDescended')elevDown=parseFloat(ga(sa,'sum'))||0;
       }
-      // Debug: count workouts with Apple elevation; log first one found
-      if(elevUp>0){
-        window._elevAppleCount=(window._elevAppleCount||0)+1;
-        if(!window._elevDbgDone){
-          console.log('📊 First workout WITH ElevationAscended — types:',_dbgTypes);
-          console.log('   elevUp='+elevUp+' elevDown='+elevDown+' date='+startDateStr);
-          window._elevDbgDone=true;
-        }
-      } else if(!window._elevNoElevDone && dist>5){
-        console.log('📊 First outdoor workout WITHOUT elevation — types:',_dbgTypes);
-        console.log('   inn-snippet:',inn.slice(0,500));
-        window._elevNoElevDone=true;
+      // Debug: log full details for workouts from the last 7 days
+      if(sMs > Date.now() - 7*24*3600*1000){
+        console.group('🔍 Recent workout: '+startDateStr+' | type='+raw+' | dist='+dist+'km');
+        console.log('WorkoutStatistics types found:', _dbgTypes.length ? _dbgTypes : ['(none)']);
+        console.log('Parsed values: cal='+cal+' dist='+dist+' elevUp='+elevUp+' elevDown='+elevDown);
+        console.log('Full inn XML:\n'+inn);
+        console.groupEnd();
       }
       const d=new Date(sMs);
       workouts.push({type:pn(raw),startMs:sMs,endMs:eMs||sMs+dur*60000,
@@ -995,7 +990,6 @@ async function streamParse(file,maxHR,onProgress){
   onProgress(72,'Sortiere…','');await yF();
   hr.sort((a,b)=>a.ts-b.ts);
   workouts.sort((a,b)=>a.startMs-b.startMs);
-  console.log('📊 Apple elevation summary: '+workouts.length+' total workouts, '+(window._elevAppleCount||0)+' with ElevationAscended from Apple Watch');
   const hrTs=hr.map(r=>r.ts);
   onProgress(76,'Verknüpfe Herzfrequenz…','');await yF();
   for(let wi=0;wi<workouts.length;wi++){
