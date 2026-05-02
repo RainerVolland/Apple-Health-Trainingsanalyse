@@ -208,30 +208,31 @@ tr.clickable:hover td{background:rgba(168,152,255,.07);cursor:pointer;}
 
 <!-- ══ WELCOME ═════════════════════════════════════════════════════════ -->
 <div id="screen-welcome" class="screen">
-  <div class="upload-inner" style="text-align:center;max-width:440px">
+  <div class="upload-inner" style="text-align:center;max-width:460px">
     <div class="upload-title">
       <div class="icon">🍎</div>
       <h1>Apple Health Analyse</h1>
-    </div>
-    <div id="welcomeStats" style="font-size:13px;color:var(--dim);margin-bottom:24px;line-height:1.7"></div>
-
-    <!-- New-data question -->
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:20px;text-align:left">
-      <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:6px">📲 Neue Apple Health Daten vorhanden?</div>
-      <div style="font-size:12px;color:var(--dim);line-height:1.6">Neue Daten → Gesundheit App → Export → Export.xml importieren.<br/>Keine neuen Daten → direkt weiter zum Dashboard.</div>
+      <div style="font-size:11px;color:var(--dim);margin-top:4px;letter-spacing:1px" id="welcomeVersion"></div>
     </div>
 
-    <button onclick="showScreen('upload')"
-      style="width:100%;padding:16px;background:var(--accent);border:none;border-radius:14px;
-             color:#fff;font-size:16px;font-weight:800;cursor:pointer;margin-bottom:10px">
-      📥 Ja — Neue Daten importieren
+    <!-- Stats summary -->
+    <div id="welcomeStats" style="font-size:13px;color:var(--dim);margin-bottom:20px;line-height:1.8;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-align:left"></div>
+
+    <!-- Cache status -->
+    <div id="welcomeCacheInfo" style="font-size:12px;margin-bottom:16px;padding:10px 14px;border-radius:10px;text-align:left;display:none"></div>
+
+    <!-- Action buttons -->
+    <button onclick="startWithCache()"
+      style="width:100%;padding:16px;background:var(--green);border:none;border-radius:14px;
+             color:#000;font-size:16px;font-weight:800;cursor:pointer;margin-bottom:10px">
+      ▶ Weiter — ohne Neuladen starten
     </button>
-    <button onclick="showScreen('dashboard')"
+    <button onclick="showScreen('upload')"
       style="width:100%;padding:14px;background:var(--card);border:2px solid var(--border);
              border-radius:14px;color:var(--txt);font-size:14px;font-weight:700;cursor:pointer">
-      ▶ Nein — Direkt ins Dashboard
+      📥 Neue Apple Health Daten importieren
     </button>
-    <div style="font-size:12px;color:var(--dim);margin-top:16px;line-height:1.6">
+    <div style="font-size:11px;color:var(--dim);margin-top:14px;line-height:1.6">
       Letzte Aktualisierung: <span id="welcomeLastSync">–</span>
     </div>
   </div>
@@ -386,6 +387,11 @@ const ZONE_DEFS = [
 ];
 
 // ═══════════════════════════════════════════════════════════
+// APP VERSION
+// ═══════════════════════════════════════════════════════════
+const APP_VERSION = 'v2.6';
+
+// ═══════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════
 let ALL_WORKOUTS=[], ALL_RHR=[], ALL_HR_SAMPLES=[];
@@ -428,10 +434,25 @@ function showUpload(){
 // UPLOAD HANDLERS
 // ═══════════════════════════════════════════════════════════
 
+// Bump this string whenever cached workout structure changes (forces one-time re-import)
+var WORKOUT_CACHE_VERSION = 'v4-metaElev';
+
 function initUploadUI(){
-  // ── First: check if we have cached data → show welcome screen ────────────
+  // ── Always show welcome screen if user has used the app before ─────────
+  var lastSync = null;
+  try{ lastSync = localStorage.getItem('lastSyncDate'); }catch(e){}
+
+  // Try to load cached workout data
+  var cacheOk = false;
   try{
+    var cachedVersion = localStorage.getItem('cachedWorkoutsVersion');
     var cached = localStorage.getItem('cachedWorkouts');
+    if(cachedVersion !== WORKOUT_CACHE_VERSION){
+      // Stale cache — discard silently
+      localStorage.removeItem('cachedWorkouts');
+      localStorage.removeItem('cachedWorkoutsVersion');
+      cached = null;
+    }
     if(cached){
       var ws = JSON.parse(cached);
       if(ws && ws.length > 0){
@@ -444,14 +465,19 @@ function initUploadUI(){
           rangeStart=ALL_WORKOUTS[0].startMs;
           rangeEnd=ALL_WORKOUTS[ALL_WORKOUTS.length-1].startMs;
         }
-        buildDashboard();          // build dashboard silently in background
-        showWelcomeScreen();       // then show the question screen
-        return;
+        buildDashboard();
+        cacheOk = true;
       }
     }
   }catch(e){ console.warn('Cache load failed:', e); }
 
-  // ── No cache → show upload screen ────────────────────────────────────────
+  if(lastSync){
+    // Show welcome screen — user has been here before
+    showWelcomeScreen(cacheOk);
+    return;
+  }
+
+  // ── First-ever start → show upload screen ────────────────────────────────
   showUploadButtons();
   showScreen('upload');
 }
@@ -500,23 +526,78 @@ function showUploadButtons(){
   }
 }
 
-function showWelcomeScreen(){
+function showWelcomeScreen(cacheOk){
+  // Version
+  document.getElementById('welcomeVersion').textContent = APP_VERSION;
+
   var lastSync = '';
   try{ lastSync = localStorage.getItem('lastSyncDate')||''; }catch(e){}
-  var latest = ALL_WORKOUTS.length ? new Date(ALL_WORKOUTS[ALL_WORKOUTS.length-1].startMs) : null;
-  var runs = ALL_WORKOUTS.filter(function(w){return w.type==='Laufen';});
-  var lastRun = runs.length ? runs[runs.length-1] : null;
-  document.getElementById('welcomeStats').innerHTML =
-    '<strong style="color:var(--txt)">'+(ALL_WORKOUTS.length)+' Trainings</strong> · '+
-    (runs.length)+' Läufe<br/>'+
-    (latest ? 'Letzter Eintrag: <strong>'+latest.toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric'})+'</strong>' : '')+
-    (lastRun ? '<br/>Letzter Lauf: '+new Date(lastRun.startMs).toLocaleDateString('de-DE',{weekday:'short',day:'numeric',month:'short'})+
-    ' · '+(lastRun.distanceKm||0).toFixed(1)+'km' : '');
+
+  // Stats
+  var statsHtml = '';
+  if(ALL_WORKOUTS && ALL_WORKOUTS.length > 0){
+    var runs = ALL_WORKOUTS.filter(function(w){return w.type==='Laufen';});
+    var lastRun = runs.length ? runs[runs.length-1] : null;
+    var latest = ALL_WORKOUTS[ALL_WORKOUTS.length-1];
+    statsHtml += '🏃 <strong style="color:var(--white)">'+ALL_WORKOUTS.length+' Trainings</strong> · '+runs.length+' Läufe geladen<br/>';
+    if(latest) statsHtml += '📅 Letzter Eintrag: <strong style="color:var(--white)">'+new Date(latest.startMs).toLocaleDateString('de-DE',{weekday:'short',day:'numeric',month:'long',year:'numeric'})+'</strong><br/>';
+    if(lastRun) statsHtml += '👟 Letzter Lauf: '+new Date(lastRun.startMs).toLocaleDateString('de-DE',{weekday:'short',day:'numeric',month:'short'})
+      +' · '+(lastRun.distanceKm||0).toFixed(1)+'km'
+      +(lastRun.elevationM>0?' · '+(lastRun.elevationM||0).toFixed(0)+'hm↑':'');
+  } else {
+    statsHtml += '📦 Keine Workout-Daten im Speicher<br/>';
+    if(lastSync) statsHtml += '📅 Zuletzt importiert: '+new Date(lastSync).toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric'});
+  }
+  // Plan info
+  try{
+    var plan = loadPlan();
+    if(plan){
+      var today = new Date().toISOString().slice(0,10);
+      var daysLeft = Math.ceil((new Date('2026-07-30')-new Date())/86400000);
+      var allS = plan.flatMap(function(w){return w.sessions;}).filter(function(s){return s.type!=='R'&&s.date<=today;});
+      var doneS = allS.filter(function(s){return s.status==='done';});
+      var comp = allS.length ? Math.round(doneS.length/allS.length*100) : 0;
+      statsHtml += '<br/>🎯 Fjällmarathon: <strong style="color:var(--accent)">'+daysLeft+' Tage</strong> · Compliance <strong style="color:var(--green)">'+comp+'%</strong>';
+    }
+  }catch(e){}
+  document.getElementById('welcomeStats').innerHTML = statsHtml;
+
+  // Cache status badge
+  var cacheEl = document.getElementById('welcomeCacheInfo');
+  if(cacheOk){
+    cacheEl.style.display = 'block';
+    cacheEl.style.background = 'rgba(26,255,160,0.08)';
+    cacheEl.style.border = '1px solid rgba(26,255,160,0.3)';
+    cacheEl.style.color = 'var(--green)';
+    cacheEl.innerHTML = '✅ Daten im Speicher — sofort startbereit';
+  } else {
+    cacheEl.style.display = 'block';
+    cacheEl.style.background = 'rgba(255,170,85,0.08)';
+    cacheEl.style.border = '1px solid rgba(255,170,85,0.3)';
+    cacheEl.style.color = 'var(--orange)';
+    cacheEl.innerHTML = '⚠️ Kein Cache — "Weiter" öffnet Dashboard ohne Workout-Daten.<br/>Für volle Analyse bitte neu importieren.';
+  }
+
   if(lastSync){
     document.getElementById('welcomeLastSync').textContent =
       new Date(lastSync).toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
   }
   showScreen('welcome');
+}
+
+// ── "Weiter ohne Neuladen" button handler ────────────────────────────────
+function startWithCache(){
+  if(ALL_WORKOUTS && ALL_WORKOUTS.length > 0){
+    showScreen('dashboard');
+  } else {
+    // No data in memory — offer plan-only view or redirect to upload
+    if(confirm('Keine Workout-Daten geladen.\n\nZum Dashboard ohne Läufe-Daten? (Trainingsplan ist verfügbar)\n\nOK = Dashboard, Abbrechen = Neuen Import starten')){
+      showScreen('dashboard');
+    } else {
+      showUploadButtons();
+      showScreen('upload');
+    }
+  }
 }
 
 // Chrome: folder picker
@@ -639,22 +720,44 @@ function findGPX(workout){
 }
 
 // Elevation gain+loss from GPX text → {gain, loss} in meters
+// GPS altitude has long autocorrelation (minutes, not seconds).
+// 7-second smoothing removes nothing useful. Solution: 60-second window (Strava/Garmin standard)
+// + hysteresis threshold of 10 m so only real terrain changes are counted.
+function calcElevGainLoss(elevations){
+  if(elevations.length < 2) return {gain:0, loss:0};
+
+  // Step 1: 60-point moving average — removes both HF noise and autocorrelated GPS drift
+  const W = 60;
+  const half = 30;
+  const smoothed = elevations.map((_,i)=>{
+    const s=Math.max(0,i-half), e=Math.min(elevations.length,s+W);
+    const sl=elevations.slice(s,e);
+    return sl.reduce((a,v)=>a+v,0)/sl.length;
+  });
+
+  // Step 2: Hysteresis filter — reference only advances when change ≥ 10 m
+  // This prevents noise oscillations from accumulating into false gain.
+  const THRESHOLD = 10;
+  let gain=0, loss=0, ref=smoothed[0];
+  for(let i=1;i<smoothed.length;i++){
+    const diff=smoothed[i]-ref;
+    if(diff >= THRESHOLD){ gain+=diff; ref=smoothed[i]; }
+    else if(diff <= -THRESHOLD){ loss+=Math.abs(diff); ref=smoothed[i]; }
+  }
+  return {gain:Math.round(gain), loss:Math.round(loss)};
+}
+
 function parseGPXElevationOnly(text){
-  let gain=0,loss=0,prev=null;
+  const elevations=[];
   const re=/<ele>([^<]+)<\/ele>/g;
   let m;
   while((m=re.exec(text))!==null){
     const e=parseFloat(m[1]);
-    if(!isNaN(e)){
-      if(prev!==null){
-        const diff=e-prev;
-        if(diff>0) gain+=diff;
-        else       loss+=Math.abs(diff);
-      }
-      prev=e;
-    }
+    if(!isNaN(e)) elevations.push(e);
   }
-  return (gain>0||loss>0)?{gain:Math.round(gain),loss:Math.round(loss)}:null;
+  if(elevations.length<2) return null;
+  const {gain,loss}=calcElevGainLoss(elevations);
+  return (gain>0||loss>0)?{gain,loss}:null;
 }
 
 // ── GPX elevation cache (localStorage) ───────────────────────────────────────
@@ -662,7 +765,7 @@ function parseGPXElevationOnly(text){
 // Value: {u: utcMs, g: elevGain, l: elevLoss}
 // First import: reads all files sequentially (same as original — fast, low GC pressure)
 // Subsequent imports: all known files resolved from cache instantly — only new files read
-const GPX_CACHE_KEY = 'gpxElevCache_v2';
+const GPX_CACHE_KEY = 'gpxElevCache_v4'; // v4: 60pt avg + 10m hysteresis (Strava/Garmin standard)
 function loadGpxCache(){ try{ const v=localStorage.getItem(GPX_CACHE_KEY); return v?JSON.parse(v):{}; }catch(_){ return {}; } }
 function saveGpxCache(c){ try{ localStorage.setItem(GPX_CACHE_KEY,JSON.stringify(c)); }catch(e){ console.warn('GPX cache save failed:',e.message); } }
 
@@ -685,13 +788,23 @@ async function precomputeElevation(){
       fromCache++;
       newCache[file.name] = hit;
       if(hit.u) GPX_INDEX.set(hit.u, file);
-      if(hit.u && hit.g){
+      if(hit.u){
         let best=null, bestDiff=30*60*1000;
         for(const w of ALL_WORKOUTS){
           const d=Math.abs(w.startMs-hit.u);
           if(d<bestDiff){bestDiff=d;best=w;}
         }
-        if(best){ best.elevationM=hit.g; best.elevationDown=hit.l||0; matched++; }
+        if(best){
+          if(best.elevationM > 0){
+            // Apple Watch barometric data already set — update cache to reflect it
+            hit.g = best.elevationM; hit.l = best.elevationDown||0;
+            matched++;
+          } else if(hit.g){
+            // No Apple data — use cached GPX computation
+            best.elevationM = hit.g; best.elevationDown = hit.l||0;
+            matched++;
+          }
+        }
       }
     } else {
       uncached.push(file);
@@ -759,9 +872,15 @@ async function precomputeElevation(){
       elevIdx++;
       const {file, utcMs, workout} = toElevate[idx];
       try{
+        // Apple Health elevation (barometric, pre-smoothed) takes priority over GPX calculation
+        const hasAppleElevation = workout.elevationM > 0;
         const text = await file.text();
-        const ele  = parseGPXElevationOnly(text);
-        if(ele){
+        const ele  = hasAppleElevation ? null : parseGPXElevationOnly(text);
+        if(hasAppleElevation){
+          matched++; // Apple data already set during XML parse — just count it
+          const c = newCache[file.name];
+          if(c){ c.g = workout.elevationM; c.l = workout.elevationDown||0; }
+        } else if(ele){
           workout.elevationM    = ele.gain;
           workout.elevationDown = ele.loss;
           matched++;
@@ -826,11 +945,12 @@ async function parseAndBuild(xmlFile){
     // If plan exists, show welcome screen instead of upload on next load
     try{
       localStorage.setItem('lastSyncDate', new Date().toISOString());
-      // Cache workouts for next visit (only runs+hikes to save space, max 1000 entries)
+      // Cache workouts for next visit (only runs+hikes to save space, max 1200 entries)
       var toCache = ALL_WORKOUTS.filter(function(w){
         return w.type==='Laufen'||w.type==='Hiking'||w.type==='Radfahren';
       }).slice(-1200);
       localStorage.setItem('cachedWorkouts', JSON.stringify(toCache));
+      localStorage.setItem('cachedWorkoutsVersion', WORKOUT_CACHE_VERSION);
     }catch(e){ console.warn('Cache save failed:', e.message); }
 
   }catch(e){
@@ -903,7 +1023,7 @@ async function streamParse(file,maxHR,onProgress){
       const localEpoch=pLocalEpoch(startDateStr);
       const dur=parseFloat(ga(as,'duration'))||0;
       if(!sMs||dur<=0)continue;
-      let cal=0,dist=0,ip=0;
+      let cal=0,dist=0,elevUp=0,elevDown=0,ip=0;
       while(true){
         const ss=inn.indexOf('<WorkoutStatistics ',ip);if(ss<0)break;
         const se=inn.indexOf('>',ss);if(se<0)break;ip=se+1;
@@ -911,9 +1031,26 @@ async function streamParse(file,maxHR,onProgress){
         if(st==='HKQuantityTypeIdentifierActiveEnergyBurned')cal=parseFloat(ga(sa,'sum'))||0;
         if(st==='HKQuantityTypeIdentifierDistanceWalkingRunning')dist=parseFloat(ga(sa,'sum'))||0;
       }
+      // Apple Watch barometric elevation is stored as MetadataEntry, e.g. value="145022 cm"
+      const parseMetaElev = key => {
+        const kp = inn.indexOf('key="'+key+'"');
+        if(kp < 0) return 0;
+        const ts = inn.lastIndexOf('<MetadataEntry ', kp);
+        const te = inn.indexOf('>', ts);
+        if(ts < 0 || te < 0) return 0;
+        const raw = ga(inn.slice(ts+15, te), 'value');
+        const sp = raw.indexOf(' ');
+        const num = parseFloat(sp>=0 ? raw.slice(0,sp) : raw) || 0;
+        const unit = sp>=0 ? raw.slice(sp+1).trim() : 'm';
+        return unit==='cm' ? num/100 : num;
+      };
+      elevUp   = parseMetaElev('HKElevationAscended');
+      elevDown = parseMetaElev('HKElevationDescended');
       const d=new Date(sMs);
       workouts.push({type:pn(raw),startMs:sMs,endMs:eMs||sMs+dur*60000,
         durationMin:dur,calories:cal,distanceKm:dist,
+        elevationM:   elevUp   > 0 ? Math.round(elevUp)   : null,
+        elevationDown:elevDown > 0 ? Math.round(elevDown) : null,
         weekday:DAYS_EN[d.getDay()],hour:d.getHours(),month:toYM(sMs),year:d.getFullYear(),localEpoch,
         hrMean:null,hrMin:null,hrMax:null,z1:null,z2:null,z3:null,z4:null,z5:null});
     }
@@ -1271,18 +1408,14 @@ function renderGPX(text, workout){
   const pts=parseGPX(text);
   if(!pts.length){document.getElementById('routeInner').innerHTML='<div class="no-data" style="padding:20px">Keine GPS-Punkte in der Route gefunden.</div>';return;}
 
-  // Compute elevation gain+loss, store on workout, update stat cards
+  // Compute elevation gain+loss with smoothing (same algorithm as parseGPXElevationOnly)
   const hasEle=pts.some(p=>p.ele!==null);
-  if(workout && hasEle){
-    let gain=0,loss=0;
-    for(let i=1;i<pts.length;i++){
-      if(pts[i].ele!==null&&pts[i-1].ele!==null){
-        const diff=pts[i].ele-pts[i-1].ele;
-        if(diff>0) gain+=diff; else loss+=Math.abs(diff);
-      }
-    }
-    if(gain>0){ workout.elevationM    = Math.round(gain); }
-    if(loss>0){ workout.elevationDown = Math.round(loss); }
+  if(workout && hasEle && !(workout.elevationM > 0)){
+    // Only use GPX elevation when no Apple barometric data is available
+    const elevArr=pts.filter(p=>p.ele!==null).map(p=>p.ele);
+    const {gain,loss}=calcElevGainLoss(elevArr);
+    if(gain>0){ workout.elevationM    = gain; }
+    if(loss>0){ workout.elevationDown = loss; }
     // Inject elevation stat cards into already-rendered stat row
     const statRow = document.querySelector('#detailContent .stat-row');
     if(statRow){
@@ -1668,7 +1801,7 @@ function updatePlanProgressComment(){
   } else if(volumeTrend>110){
     comment += `<span style="color:var(--yellow)">💡 Über dem Zielvolumen — auf Erholung achten, nicht überlasten.</span>`;
   } else if(compliance>=85){
-    comment += `<span style="color:var(--green)">💪 Stark! Auf diesem Kurs zum 100k-Finish.</span>`;
+    comment += `<span style="color:var(--green)">💪 Stark! Auf diesem Kurs zum Fjällmarathon-Finish.</span>`;
   }
 
   // Inject into plan tab overview section if it exists
@@ -1724,7 +1857,7 @@ function renderHR(){
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🏔️ ULTRA 100k TRAININGSPLAN — 30. Juli 2026
+// 🏔️ FJÄLLMARATHON TRAININGSPLAN — 30. Juli 2026
 // ═══════════════════════════════════════════════════════════
 
 const RACE_DATE  = new Date('2026-07-30');
@@ -2138,6 +2271,219 @@ function exportPlanToICal(planData){
   dlFile('ultraplan_kalender.ics',lines.join('\r\n'),'text/calendar;charset=utf-8');
 }
 
+// ── Export current plan as LLM input package ────────────────────────────────
+function exportPlanForLLM(){
+  const planData = loadPlan();
+  if(!planData){ alert('Kein Plan vorhanden.'); return; }
+  const today = new Date().toISOString().slice(0,10);
+  const curWk = getCurrentWeek(planData);
+
+  // Build compact week summary (Ist-Daten)
+  const weekSummary = planData.map(wk=>{
+    const sess = wk.sessions.filter(s=>s.type!=='R');
+    const done = sess.filter(s=>s.status==='done');
+    const istKm = done.reduce((s,x)=>s+(x.actualKm||0),0);
+    const istHm = done.reduce((s,x)=>s+(x.actualHm||0),0);
+    const avgHr = done.filter(x=>x.actualHr).length
+      ? Math.round(done.filter(x=>x.actualHr).reduce((s,x)=>s+x.actualHr,0)/done.filter(x=>x.actualHr).length) : null;
+    const isPast = wk.sessions.every(s=>s.date<today);
+    return {
+      wk: wk.wk, phase: wk.phase,
+      status: isPast ? 'abgeschlossen' : wk.wk===curWk ? 'laufend' : 'geplant',
+      soll: { km: wk.targetVol, longKm: wk.targetLong, hm: wk.targetHm },
+      ist:  { km: Math.round(istKm*10)/10, hm: istHm, avgHrBpm: avgHr,
+              einheitenErledigt: done.length, einheitenGeplant: sess.length },
+      abweichungKm: Math.round((istKm-wk.targetVol)*10)/10,
+      sessions: wk.sessions.filter(s=>s.type!=='R'&&s.date<=today).map(s=>({
+        datum: s.date, tag: s.dayLabel, typ: s.type,
+        sollKm: s.distKm, sollHm: s.hmTarget, sollMin: s.durationMin,
+        status: s.status,
+        istKm: s.actualKm, istHm: s.actualHm, istHrBpm: s.actualHr,
+      })),
+    };
+  });
+
+  const output = {
+    meta: {
+      exportDatum: today,
+      aktuelleWoche: curWk,
+      rennen: { name:'Fjällmarathon', datum:'2026-07-30', distanzKm:100, hoehenMeterHm:3300, zielzeit:'13-14h' },
+      athlet: {
+        maxHrBpm: 159,
+        easyPaceMinKm: 6.8, longPaceMinKm: 7.2, trailPaceMinKm: 9.5,
+        hrZonen: { Z1:'<95', Z2:'95-111', Z3:'112-127', Z4:'127-143', Z5:'>143' },
+        trainingsstruktur: 'Di+Do 05:30h (60min, flach, kein Berg), Sa Hauptlauf (Berg/Trail), So Recovery/B2B',
+        constraints: ['Bergläufe (HI) NUR Sa/So und bayerische Feiertage', 'Max 4 Einheiten/Woche', 'Di+Do max 60min wegen Büro'],
+        bayerischeFeiertage2026: [...BAVARIAN_HOLIDAYS],
+      },
+    },
+    planStatus: {
+      gesamtCompliance: (()=>{
+        const all=planData.flatMap(w=>w.sessions).filter(s=>s.type!=='R'&&s.date<=today);
+        const done=all.filter(s=>s.status==='done');
+        return all.length ? Math.round(done.length/all.length*100)+'%' : '0%';
+      })(),
+      wochen: weekSummary,
+    },
+    planVoll: planData,
+    anweisungen: 'DIESE DATEI DIENT ALS INPUT FÜR DAS LLM. Lies die README-Anweisung im separaten Prompt.',
+  };
+
+  dlFile('plan_llm_input.json', JSON.stringify(output,null,2), 'application/json');
+}
+
+// ── Convert workouts.json format → plan format ────────────────────────────────
+function convertWorkoutsToPlan(workouts){
+  const SPORT_TYPE = { CoreTraining:'EL', Radfahren:'EL', Schwimmen:'EL', Yoga:'EL', Wandern:'LL', Klettern:'EL' };
+  const DAY_LABELS = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+  const getMonday = dateStr => {
+    const d = new Date(dateStr); d.setHours(0,0,0,0);
+    const day = d.getDay();
+    d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+    return d.toISOString().slice(0,10);
+  };
+  const today = new Date().toISOString().slice(0,10);
+
+  // Group by Monday of week
+  const weekMap = {};
+  for(const w of workouts){
+    if(!w.startTime) continue;
+    const date = w.startTime.slice(0,10);
+    const mon = getMonday(date);
+    if(!weekMap[mon]) weekMap[mon] = [];
+    weekMap[mon].push({...w, _date: date});
+  }
+
+  return Object.keys(weekMap).sort().map((mon, i) => {
+    const entries = weekMap[mon];
+    const targetVol   = Math.round(entries.reduce((s,x)=>s+(x.distanceKm||0),0)*10)/10;
+    const targetLong  = Math.round(Math.max(0,...entries.map(s=>s.distanceKm||0))*10)/10;
+    const targetHm    = Math.max(0,...entries.map(s=>s.elevationM||0));
+
+    const sessions = entries.map(s => {
+      const d = new Date(s._date);
+      const weekday = d.getDay();
+      const isWE = weekday === 0 || weekday === 6;
+      const isPast = s._date <= today;
+      const km = s.distanceKm || 0;
+      const hm = s.elevationM || 0;
+
+      // Infer session type; honour explicit planType field if LLM provided it
+      let type = s.planType || null;
+      if(!type){
+        if(s.sportType === 'Laufen'){
+          if(km >= 20)        type = hm >= 500 ? 'LLH' : 'LL';
+          else if(km >= 14)   type = hm >= 300 && isWE ? 'LLH' : 'M';
+          else if(hm >= 200 && isWE) type = 'HI';
+          else if(km >= 8)    type = 'IL';
+          else                type = 'R';
+        } else {
+          type = SPORT_TYPE[s.sportType] || 'EL';
+        }
+      }
+      // HI only allowed on weekends/holidays
+      if(type === 'HI' && !isWeekendOrHoliday(s._date)) type = 'IL';
+
+      return {
+        date:       s._date,
+        dayLabel:   DAY_LABELS[weekday],
+        type,
+        durationMin: Math.round(s.durationMin || 60),
+        distKm:     s.distanceKm || null,
+        hmTarget:   hm,
+        status:     isPast ? 'done' : 'planned',
+        actualKm:   isPast ? (s.distanceKm || null)  : null,
+        actualHm:   isPast ? (s.elevationM  || null)  : null,
+        actualHr:   isPast ? (s.avgHr       || null)  : null,
+        note:       s.note || '',
+        tips:       '',
+        time:       isWE ? '07:00' : '05:30',
+        syncedFrom: s.sourceId || null,
+      };
+    });
+
+    return { wk: i+1, phase:'Build', targetVol, targetLong, targetHm, note:'', sessions };
+  });
+}
+
+// ── Import LLM-generated plan ─────────────────────────────────────────────────
+async function importLLMPlan(event){
+  const file = event.target.files[0]; if(!file) return;
+  let incoming;
+  try{
+    const text = await file.text();
+    incoming = JSON.parse(text);
+  }catch(e){
+    showJsonSyncResult('error','❌ Ungültige JSON-Datei: '+e.message); return;
+  }
+
+  // Accept plan format, {plan/planVoll} wrapper, or workouts.json (flat array with startTime)
+  let newPlan = Array.isArray(incoming) ? incoming : (incoming.plan || incoming.planVoll);
+  if(Array.isArray(newPlan) && newPlan.length > 0 && newPlan[0]?.startTime !== undefined && !newPlan[0]?.sessions){
+    // workouts.json format — auto-convert to plan weeks
+    newPlan = convertWorkoutsToPlan(newPlan);
+    showJsonSyncResult('info','ℹ️ workouts.json erkannt — automatisch in Planformat konvertiert…');
+  }
+  if(!Array.isArray(newPlan)||!newPlan[0]?.sessions){
+    showJsonSyncResult('error','❌ Format nicht erkannt. Erwartet: Wochen-Array mit sessions[] oder workouts.json mit startTime.'); return;
+  }
+
+  // Validate required fields
+  const required = ['wk','phase','targetVol','targetLong','targetHm','note','sessions'];
+  const sessRequired = ['date','type','durationMin','distKm','status'];
+  for(const wk of newPlan){
+    for(const f of required) if(wk[f]===undefined){ showJsonSyncResult('error',`❌ Feld fehlt in Woche ${wk.wk||'?'}: "${f}"`); return; }
+    for(const s of wk.sessions||[]){
+      for(const f of sessRequired) if(s[f]===undefined){ showJsonSyncResult('error',`❌ Session-Feld fehlt (${s.date||'?'}): "${f}"`); return; }
+      if(!['R','EL','M','IL','HI','LL','LLH','BTB','SIM'].includes(s.type)){
+        showJsonSyncResult('error',`❌ Unbekannter Session-Typ: "${s.type}" am ${s.date}`); return;
+      }
+      if(!isWeekendOrHoliday(s.date) && s.type==='HI'){
+        showJsonSyncResult('error',`❌ HI (Berglauf) an Wochentag ohne Feiertag: ${s.date} — bitte als IL umschreiben`); return;
+      }
+    }
+  }
+
+  // Remap R (rest) → EL when the session clearly contains a run (LLMs often use R for easy runs)
+  newPlan.forEach(wk=>wk.sessions.forEach(s=>{
+    if(s.type==='R' && (s.distKm > 0 || s.durationMin >= 30)) s.type='EL';
+  }));
+
+  // Preserve existing Ist-Daten: merge status/actualKm/actualHm/actualHr by date
+  const existingPlan = loadPlan() || [];
+  const existingByDate = {};
+  existingPlan.forEach(wk=>wk.sessions.forEach(s=>{ if(s.status==='done'||s.status==='missed') existingByDate[s.date]=s; }));
+
+  newPlan.forEach(wk=>wk.sessions.forEach(s=>{
+    const ex = existingByDate[s.date];
+    if(ex){
+      s.status    = ex.status;
+      s.actualKm  = ex.actualKm  ?? s.actualKm  ?? null;
+      s.actualHm  = ex.actualHm  ?? s.actualHm  ?? null;
+      s.actualHr  = ex.actualHr  ?? s.actualHr  ?? null;
+      s.syncedFrom= ex.syncedFrom ?? s.syncedFrom ?? null;
+    }
+    // Ensure required fields have defaults
+    if(s.actualKm===undefined)  s.actualKm=null;
+    if(s.actualHm===undefined)  s.actualHm=null;
+    if(s.actualHr===undefined)  s.actualHr=null;
+    if(s.note===undefined)      s.note='';
+    if(s.tips===undefined)      s.tips='';
+    if(s.time===undefined)      s.time= new Date(s.date).getDay()>=5 ? '07:00' : '05:30';
+    if(s.dayLabel===undefined){
+      const days=['So','Mo','Di','Mi','Do','Fr','Sa'];
+      s.dayLabel=days[new Date(s.date).getDay()];
+    }
+    if(s.hmTarget===undefined)  s.hmTarget=0;
+  }));
+
+  // Bump key so old cached plan is replaced
+  localStorage.removeItem(PLAN_KEY);
+  savePlan(newPlan);
+  showJsonSyncResult('success',`✅ LLM-Plan geladen · ${newPlan.length} Wochen · ${Object.keys(existingByDate).length} Ist-Einträge übernommen`);
+  renderPlan();
+}
+
 // ── Import workouts.json and sync with plan ──────────────────────────────────
 async function handlePlanJsonUpload(event){
   const file=event.target.files[0]; if(!file) return;
@@ -2247,17 +2593,40 @@ function renderPlan(){
   const compliance = allSessions.length ? Math.round(doneSessions.length/allSessions.length*100) : 0;
 
   panel.innerHTML = `
-  <!-- JSON SYNC BANNER -->
-  <div id="jsonSyncBanner" style="background:rgba(168,152,255,.08);border:1px solid rgba(168,152,255,.25);border-radius:12px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-    <div style="font-size:22px">📂</div>
-    <div style="flex:1;min-width:200px">
-      <div style="font-weight:700;color:var(--white);font-size:14px">Health-Daten hochladen (workouts.json)</div>
-      <div style="font-size:12px;color:var(--dim);margin-top:2px">Plan automatisch mit aktuellen Läufen abgleichen → Export-Tab → workouts.json herunterladen</div>
+  <!-- SYNC + LLM BANNER -->
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+
+    <!-- Row 1: Health-Daten sync -->
+    <div id="jsonSyncBanner" style="background:rgba(168,152,255,.08);border:1px solid rgba(168,152,255,.25);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="font-size:20px">📂</div>
+      <div style="flex:1;min-width:160px">
+        <div style="font-weight:700;color:var(--white);font-size:13px">Ist-Daten einlesen (workouts.json)</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:2px">Export-Tab → workouts.json → Plan automatisch abgleichen</div>
+      </div>
+      <label style="background:var(--accent);border:none;border-radius:8px;color:#fff;padding:8px 16px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap">
+        ↑ JSON laden
+        <input type="file" accept=".json,application/json" style="display:none" onchange="handlePlanJsonUpload(event)"/>
+      </label>
     </div>
-    <label style="background:var(--accent);border:none;border-radius:8px;color:#fff;padding:9px 18px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap">
-      ↑ JSON laden
-      <input type="file" accept=".json,application/json" style="display:none" onchange="handlePlanJsonUpload(event)"/>
-    </label>
+
+    <!-- Row 2: LLM Plan import/export -->
+    <div style="background:rgba(255,229,102,.06);border:1px solid rgba(255,229,102,.2);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="font-size:20px">🤖</div>
+      <div style="flex:1;min-width:160px">
+        <div style="font-weight:700;color:var(--yellow);font-size:13px">KI-Trainingsplan</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:2px">1. Daten exportieren → 2. In Claude/ChatGPT eingeben → 3. Angepassten Plan importieren</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button onclick="exportPlanForLLM()" style="background:rgba(255,229,102,.12);border:1px solid rgba(255,229,102,.3);border-radius:8px;color:var(--yellow);padding:8px 14px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap">
+          ↓ Daten exportieren
+        </button>
+        <label style="background:rgba(26,255,160,.1);border:1px solid rgba(26,255,160,.3);border-radius:8px;color:#1affa0;padding:8px 14px;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap">
+          ↑ KI-Plan importieren
+          <input type="file" accept=".json,application/json" style="display:none" onchange="importLLMPlan(event)"/>
+        </label>
+      </div>
+    </div>
+
   </div>
 
   <!-- TODAY card -->
@@ -2328,7 +2697,7 @@ function renderPlan(){
     🏅 30 Marathons · Ø <strong style="color:var(--white)">50km/Woche</strong> (letzte 8 Wo.) · Peak-Woche <strong style="color:var(--green)">62km</strong> · MaxHR <strong style="color:var(--white)">159bpm</strong><br/>
     🏔️ Längste Läufe: 31km/303hm (Apr 12) + 26km/<strong style="color:var(--yellow)">1812hm</strong> Trail (Apr 18) · 31 Hikes / <strong style="color:var(--yellow)">34.300hm</strong> in 6 Mo.<br/>
     🎯 <strong style="color:var(--green)">Update Apr 23:</strong> Do-Lauf heute bei <strong style="color:var(--white)">7.5min/km / HR 117</strong> = echtes Z2! Plan greift bereits.<br/>
-    <strong style="color:var(--blue)">Ziel:</strong> 100k / 3.300hm am 30. Juli 2026 · Finishzeit: <strong style="color:var(--white)">13–14h</strong> · Plan W1: 2/4 ✅ erledigt<br/>
+    <strong style="color:var(--blue)">Ziel:</strong> Fjällmarathon · 100k / 3.300hm am 30. Juli 2026 · Finishzeit: <strong style="color:var(--white)">13–14h</strong><br/>
     <span style="color:rgba(255,255,255,.4)">4 Läufe/Woche: Di+Do 5:30h (Puls Z2) · Sa Berg (RPE 5-6, Gehen bergauf ok!) · So Recovery</span>
   </div>
 
@@ -2423,42 +2792,88 @@ function renderPlan(){
       </div>
     </div>
     ${planData.map(wk=>{
-      const phaseColors={Basis:'#33ddff',Aufbau:'#1affa0',Build:'#ffe566',Peak:'#ffaa55',Taper:'#a898ff'};
+      const phaseColors={'Basis':'#33ddff','Aufbau':'#1affa0','Build I':'#ffe566','Build II':'#ffcc44','Build':'#ffe566','Deload':'#33ddff','Peak':'#ffaa55','Taper':'#a898ff'};
       const col=phaseColors[wk.phase]||'#a898ff';
-      const wkSess=wk.sessions.filter(s=>s.type!=='R');
+      const wkSess=wk.sessions.filter(s=>s.type!=='R'||s.distKm>0);
       const wkDone=wkSess.filter(s=>s.status==='done').length;
+      const wkMissed=wkSess.filter(s=>s.status==='missed').length;
       const isCur=wk.wk===curWk;
       const isPast=wk.sessions.every(s=>s.date<today);
+      const compliance=wkSess.length?wkDone/wkSess.length:0;
+      const compCol=isPast?(compliance>=1?'#1affa0':compliance>=.5?'#ffe566':'#ff5577'):'var(--dim)';
+      const wkDate=new Date(wk.sessions[0].date).toLocaleDateString('de-DE',{day:'numeric',month:'short'});
       return `
-      <div class="week-row" style="${isCur?'background:rgba(168,152,255,.05);border-radius:8px;padding:12px 8px;margin:-4px -8px;':'opacity:'+(!isPast||isCur?1:.65)+';'}">
-        <div>
-          <div class="week-num">W${wk.wk}</div>
-          <div style="font-size:10px;color:var(--dim)">${new Date(wk.sessions[0].date).toLocaleDateString('de-DE',{day:'numeric',month:'short'})}</div>
+      <div style="margin-bottom:14px;border:1px solid ${isCur?'rgba(168,152,255,.35)':'rgba(255,255,255,.07)'};border-radius:10px;overflow:hidden;${isPast&&!isCur?'opacity:.75':''}">
+        <!-- Week header -->
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;background:${isCur?'rgba(168,152,255,.12)':'rgba(255,255,255,.03)'};border-bottom:1px solid rgba(255,255,255,.07)">
+          <div style="font-size:15px;font-weight:800;color:${isCur?'var(--accent)':'var(--white)'}">W${wk.wk}${isCur?' ←':''}</div>
+          <div style="font-size:11px;color:var(--dim)">${wkDate}</div>
+          <span style="font-size:11px;font-weight:700;color:${col};background:rgba(255,255,255,.06);padding:2px 9px;border-radius:99px;border:1px solid ${col}33">${wk.phase}</span>
+          <span style="font-size:11px;color:var(--dim)">Ziel: <strong style="color:var(--white)">${wk.targetVol}km</strong> · <strong style="color:var(--yellow)">${wk.targetHm}hm</strong></span>
+          <div style="margin-left:auto;font-size:12px;font-weight:700;color:${compCol}">${wkDone}/${wkSess.length} ✓${wkMissed>0?' · '+wkMissed+' ✗':''}</div>
         </div>
-        <div>
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
-            <span style="font-size:11px;font-weight:700;color:${col};background:rgba(255,255,255,.05);padding:2px 8px;border-radius:99px">${wk.phase}</span>
-            <span style="font-size:11px;color:var(--dim)">${wk.targetVol}km · ${wk.targetLong}km Long · ${wk.targetHm}hm</span>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;gap:3px">
-            ${wk.sessions.filter(s=>s.type!=='R').map(s=>{
-              const sType=ST[s.type]||{emoji:'▪️'};
-              const isToday=s.date===today;
-              let bg='rgba(255,255,255,.05)', color='var(--dim)';
-              if(s.status==='done'){bg='rgba(26,255,160,.12)';color='#1affa0';}
-              else if(s.status==='missed'){bg='rgba(255,85,119,.1)';color='#ff5577';}
-              else if(isToday){bg='var(--accent)';color='#fff';}
-              return `<button style="background:${bg};color:${color};border:none;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;margin:2px"
-                onclick="editSession('${s.date}')" title="${s.date} · ${s.time} · ${s.durationMin}min${s.distKm?' · '+s.distKm+'km':''}">
-                ${sType.emoji} ${s.dayLabel}</button>`;
-            }).join('')}
-          </div>
-          <div style="font-size:11px;color:var(--dim);margin-top:4px;font-style:italic">${wk.note}</div>
-        </div>
-        <div style="text-align:right;min-width:40px">
-          <div style="font-size:12px;font-weight:700;color:${wkDone===wkSess.length&&wkSess.length>0?'var(--green)':'var(--dim)'}">${wkDone}/${wkSess.length}</div>
-          ${isCur?`<div style="font-size:10px;color:var(--accent)">← Jetzt</div>`:''}
-        </div>
+        <!-- Sessions table -->
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.3);background:rgba(255,255,255,.02)">
+              <th style="padding:5px 10px;text-align:left">Tag</th>
+              <th style="padding:5px 8px;text-align:left">Einheit</th>
+              <th style="padding:5px 8px;text-align:left">Soll</th>
+              <th style="padding:5px 8px;text-align:center">Status</th>
+              <th style="padding:5px 8px;text-align:right">Ist km</th>
+              <th style="padding:5px 8px;text-align:right">Ist hm</th>
+              <th style="padding:5px 8px;text-align:right">Ø HF</th>
+              <th style="padding:5px 8px;text-align:center"></th>
+            </tr>
+          </thead>
+          <tbody>
+          ${wkSess.map((s,si)=>{
+            const sType=ST[s.type]||{emoji:'▪️',label:s.type};
+            const isToday=s.date===today;
+            const isPastDay=s.date<today;
+            let rowBg='transparent';
+            let statusBadge='';
+            if(isToday){ rowBg='rgba(168,152,255,.07)'; statusBadge='<span style="background:var(--accent);color:#fff;padding:2px 8px;border-radius:4px;font-weight:700;font-size:10px">HEUTE</span>'; }
+            else if(s.status==='done'){ rowBg='rgba(26,255,160,.04)'; statusBadge='<span style="color:#1affa0;font-weight:700;font-size:13px">✅</span>'; }
+            else if(s.status==='missed'){ rowBg='rgba(255,85,119,.05)'; statusBadge='<span style="color:#ff5577;font-weight:700;font-size:13px">❌</span>'; }
+            else if(isPastDay){ rowBg='rgba(255,170,0,.04)'; statusBadge='<span style="color:#ffaa55;font-weight:700;font-size:11px">⚠️</span>'; }
+            else { statusBadge='<span style="color:rgba(255,255,255,.2);font-size:11px">○</span>'; }
+            const doneKm=s.actualKm!=null?s.actualKm.toFixed(1):'–';
+            const doneHm=s.actualHm!=null?s.actualHm:'–';
+            const doneHr=s.actualHr!=null?s.actualHr:'–';
+            const kmDiff=s.actualKm!=null&&s.distKm!=null?(s.actualKm-s.distKm).toFixed(1):null;
+            const hmDiff=s.actualHm!=null&&s.hmTarget?(s.actualHm-s.hmTarget):null;
+            return `<tr style="background:${rowBg};border-top:1px solid rgba(255,255,255,.04)" onclick="editSession('${s.date}')" title="Klicken zum Bearbeiten">
+              <td style="padding:7px 10px;white-space:nowrap">
+                <span style="font-weight:700;color:${isToday?'var(--accent)':'var(--white)'}">${s.dayLabel}</span>
+                <span style="color:rgba(255,255,255,.3);font-size:10px;margin-left:4px">${s.date.slice(5).replace('-','.')}</span>
+              </td>
+              <td style="padding:7px 8px">
+                <span style="font-size:15px">${sType.emoji}</span>
+                <span style="font-weight:700;color:var(--white);margin-left:4px">${sType.label}</span>
+              </td>
+              <td style="padding:7px 8px;color:rgba(255,255,255,.55);font-size:11px;max-width:200px">
+                ${s.durationMin}min${s.distKm?' · '+s.distKm+'km':''}${s.hmTarget?' · '+s.hmTarget+'hm':''}
+                ${s.note?'<br><span style="color:rgba(255,255,255,.3);font-size:10px">'+s.note+'</span>':''}
+              </td>
+              <td style="padding:7px 8px;text-align:center">${statusBadge}</td>
+              <td style="padding:7px 8px;text-align:right;font-weight:700;color:${s.actualKm!=null?(kmDiff>=0?'#1affa0':kmDiff>=-2?'#ffe566':'#ff5577'):'rgba(255,255,255,.25)'}">
+                ${doneKm}${kmDiff!=null?'<br><span style="font-size:10px">'+(kmDiff>=0?'+':'')+kmDiff+'</span>':''}
+              </td>
+              <td style="padding:7px 8px;text-align:right;font-weight:700;color:${s.actualHm!=null?(hmDiff>=0||hmDiff>-100?'#1affa0':hmDiff>-300?'#ffe566':'#ff5577'):'rgba(255,255,255,.25)'}">
+                ${doneHm}${hmDiff!=null?'<br><span style="font-size:10px">'+(hmDiff>=0?'+':'')+hmDiff+'</span>':''}
+              </td>
+              <td style="padding:7px 8px;text-align:right;font-weight:700;color:${s.actualHr!=null?'#ff8888':'rgba(255,255,255,.25)'}">
+                ${doneHr}${s.actualHr&&s.actualHr>130?'<span style="color:#ffe566;font-size:10px"> Z3+</span>':''}
+              </td>
+              <td style="padding:7px 8px;text-align:center">
+                <button onclick="event.stopPropagation();editSession('${s.date}')" style="background:rgba(168,152,255,.15);border:1px solid rgba(168,152,255,.3);border-radius:6px;color:var(--accent);padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer">✏️</button>
+              </td>
+            </tr>`;
+          }).join('')}
+          </tbody>
+        </table>
+        ${wk.note?`<div style="padding:6px 14px 8px;font-size:11px;color:rgba(255,255,255,.4);font-style:italic;border-top:1px solid rgba(255,255,255,.04)">💡 ${wk.note}</div>`:''}
       </div>`;
     }).join('')}
   </div>`;
@@ -2555,7 +2970,8 @@ function openCheckin(){
 function closeCheckin(){
   document.getElementById('checkin-overlay').style.display='none';
 }
-document.getElementById('checkin-overlay').addEventListener('click',e=>{
+const _overlay=document.getElementById('checkin-overlay');
+if(_overlay) _overlay.addEventListener('click',e=>{
   if(e.target===e.currentTarget) closeCheckin();
 });
 
@@ -2616,84 +3032,16 @@ function confirmCheckin(date, status){
 setTimeout(()=>{ if(document.getElementById('screen-dashboard').classList.contains('active')) maybeShowDailyCheckin(); }, 1500);
 
 
-// ═══════════════════════════════════════════════════════════
-// WELCOME SCREEN — check for existing data on startup
-// ═══════════════════════════════════════════════════════════
+// maybeShowWelcome — called after a fresh import to return to welcome screen
 function maybeShowWelcome(){
   try{
     var lastSync = localStorage.getItem('lastSyncDate');
-    var planData = loadPlan();
     if(lastSync && ALL_WORKOUTS && ALL_WORKOUTS.length > 0){
-      // We have data in memory — show welcome
-      document.getElementById('welcomeLastSync').textContent =
-        new Date(lastSync).toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      var runs = ALL_WORKOUTS.filter(function(w){return w.type==='Laufen';});
-      var lastRun = runs.length ? runs[runs.length-1] : null;
-      if(lastRun){
-        document.getElementById('welcomeStats').innerHTML =
-          'Letzter Lauf: <strong style="color:var(--white)">'
-          +new Date(lastRun.startMs).toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})+'</strong><br/>'
-          +Math.round(lastRun.distanceKm||0)+'km · '+(lastRun.hrMean||'–')+' bpm ø · '+(lastRun.elevationM||0)+'hm↑';
-      }
-      var plan = planData;
-      if(plan){
-        var today = new Date().toISOString().slice(0,10);
-        var allS = plan.flatMap(function(w){return w.sessions;}).filter(function(s){return s.type!=='R'&&s.date<=today;});
-        var doneS = allS.filter(function(s){return s.status==='done';});
-        var comp = allS.length ? Math.round(doneS.length/allS.length*100) : 0;
-        var daysLeft = Math.ceil((new Date('2026-07-30')-new Date())/86400000);
-        document.getElementById('welcomeStats').innerHTML +=
-          '<br/>Plan: <strong style="color:var(--green)">'+comp+'% Compliance</strong>'
-          +' · '+daysLeft+' Tage bis zum Start';
-      }
-      showScreen('welcome');
+      showWelcomeScreen(true);
       return true;
     }
   }catch(e){}
   return false;
-}
-
-// Check on page load — if data was previously loaded show welcome
-window.addEventListener('load', function(){
-  // Only show welcome if we have cached workout data
-  // (in this app data is not persisted across sessions, so on fresh load always show upload)
-  // But if plan exists, offer to skip re-upload
-  try{
-    var lastSync = localStorage.getItem('lastSyncDate');
-    if(lastSync){
-      document.getElementById('welcomeLastSync').textContent =
-        new Date(lastSync).toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric'});
-      // Show welcome with option to reload data or go to plan-only view
-      showWelcomeOnLoad();
-    }
-  }catch(e){}
-});
-
-function showWelcomeOnLoad(){
-  try{
-    var lastSync = localStorage.getItem('lastSyncDate');
-    if(!lastSync) return;
-    var plan = loadPlan();
-    var daysLeft = Math.ceil((new Date('2026-07-30')-new Date())/86400000);
-    var today = new Date().toISOString().slice(0,10);
-    var stats = '';
-    if(plan){
-      var allS = plan.flatMap(function(w){return w.sessions;}).filter(function(s){return s.type!=='R'&&s.date<=today;});
-      var doneS = allS.filter(function(s){return s.status==='done';});
-      var comp = allS.length ? Math.round(doneS.length/allS.length*100) : 0;
-      var curWk = 1;
-      for(var i=0;i<plan.length;i++){
-        if(plan[i].sessions.some(function(s){return s.date<=today;})) curWk=plan[i].wk;
-      }
-      stats = 'Trainingsplan Woche '+curWk+'/15 · <strong style="color:var(--green)">'+comp+'% Compliance</strong><br/>'
-        +'<strong style="color:var(--accent)">'+daysLeft+' Tage</strong> bis zum 100k Start (30. Juli 2026)';
-    }
-    document.getElementById('welcomeStats').innerHTML = stats ||
-      'Letzte Daten vom '+new Date(lastSync).toLocaleDateString('de-DE',{day:'numeric',month:'long'});
-    document.getElementById('welcomeLastSync').textContent =
-      new Date(lastSync).toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric'});
-    showScreen('welcome');
-  }catch(e){}
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2759,10 +3107,11 @@ function renderRuns(){
   // ── Plan vs actual deviation ──────────────────────────────
   var planData = loadPlan();
   var planWkKm=[], actWkKm=[], planWkHm=[], actWkHm=[], wkLabels=[];
+  // HR target per session type (weighted zone midpoints)
+  var HR_TARGET = {EL:103, M:120, IL:120, HI:112, LL:103, LLH:108, BTB:108, SIM:112, R:103};
+  var PLAN_START = '2026-04-01';
   if(planData){
     planData.forEach(function(wk){
-      var wkStart = wk.sessions[0]&&wk.sessions[0].date;
-      var wkEnd   = wk.sessions[6]&&wk.sessions[6].date;
       var actKm=0, actHm=0;
       wk.sessions.forEach(function(s){
         if(s.actualKm) actKm+=s.actualKm;
@@ -2773,6 +3122,74 @@ function renderRuns(){
       planWkHm.push(wk.targetHm);
       actWkHm.push(Math.round(actHm));
       wkLabels.push('W'+wk.wk);
+    });
+  }
+
+  // ── Build detailed Soll/Ist rows for weeks from PLAN_START ────
+  var planTableRows = '';
+  if(planData){
+    var today = new Date().toISOString().slice(0,10);
+    var phaseCol = {Basis:'#33ddff',Aufbau:'#1affa0','Build I':'#ffe566','Build II':'#ffaa55',Build:'#ffe566',Deload:'#33ddff',Peak:'#ffaa55',Taper:'#a898ff'};
+    planData.forEach(function(wk){
+      var dates = wk.sessions.map(function(s){return s.date;}).sort();
+      if(dates[dates.length-1] < PLAN_START) return; // skip weeks fully before April 1
+      var dateFrom = dates[0], dateTo = dates[dates.length-1];
+      var fmt = function(d){ var p=d.split('-'); return p[2]+'.'+p[1]+'.'; };
+      var col = phaseCol[wk.phase]||'#a898ff';
+      var isFuture = dates[0] > today;
+      var isCur = dates[0] <= today && dateTo >= today;
+
+      // Ist km + Hm from plan (already synced with health data)
+      var istKm=0, istHm=0, hrSum=0, hrCnt=0, sollHrSum=0, sollHrDur=0;
+      var doneSess=0, totalSess=0;
+      wk.sessions.forEach(function(s){
+        if(s.type==='R' && !s.distKm) return; // skip rest placeholders
+        totalSess++;
+        var hr = HR_TARGET[s.type]||103;
+        sollHrSum += hr * (s.durationMin||60);
+        sollHrDur += (s.durationMin||60);
+        if(s.status==='done'){
+          doneSess++;
+          istKm += s.actualKm||0;
+          istHm += s.actualHm||0;
+          // get HR: prefer actualHr, else look up matching run in ALL_WORKOUTS
+          var hr_ist = s.actualHr;
+          if(!hr_ist){
+            var match = runs.filter(function(r){
+              return new Date(r.startMs).toISOString().slice(0,10)===s.date && r.hrMean;
+            })[0];
+            if(match) hr_ist = match.hrMean;
+          }
+          if(hr_ist){ hrSum+=hr_ist; hrCnt++; }
+        }
+      });
+      var sollHr = sollHrDur ? Math.round(sollHrSum/sollHrDur) : null;
+      var istHr  = hrCnt ? Math.round(hrSum/hrCnt) : null;
+      var dKm    = istKm - wk.targetVol;
+      var dHm    = istHm - wk.targetHm;
+      var compliance = totalSess ? doneSess/totalSess : 0;
+      var compCol = compliance>=1?'#1affa0':compliance>=.5?'#ffe566':isFuture?'var(--dim)':'#ff5577';
+      var rowBg = isCur ? 'rgba(168,152,255,.06)' : 'transparent';
+      var dimFuture = isFuture ? 'opacity:.55' : '';
+
+      planTableRows += '<tr style="background:'+rowBg+';border-top:1px solid rgba(255,255,255,.05);'+dimFuture+'">'
+        +'<td style="padding:7px 8px;white-space:nowrap;font-weight:700;color:'+(isCur?'var(--accent)':'var(--txt)')+'">W'+wk.wk+(isCur?' ←':'')+'</td>'
+        +'<td style="padding:7px 8px;white-space:nowrap;font-size:11px;color:var(--dim)">'+fmt(dateFrom)+'–'+fmt(dateTo)+'</td>'
+        +'<td style="padding:7px 8px"><span style="color:'+col+';font-size:11px;font-weight:700">'+wk.phase+'</span></td>'
+        // km
+        +'<td style="padding:7px 8px;text-align:right;color:var(--dim)">'+wk.targetVol+'</td>'
+        +'<td style="padding:7px 8px;text-align:right;font-weight:700;color:'+(istKm>0?'var(--white)':'var(--dim)')+'">'+( istKm>0?istKm.toFixed(1):'–')+'</td>'
+        +'<td style="padding:7px 8px;text-align:right;font-weight:700;color:'+(istKm>0?(dKm>=-2?'#1affa0':dKm>=-8?'#ffe566':'#ff5577'):'var(--dim)')+'">'+( istKm>0?(dKm>=0?'+':'')+dKm.toFixed(1):'–')+'</td>'
+        // hm
+        +'<td style="padding:7px 8px;text-align:right;color:var(--dim)">'+(wk.targetHm||'–')+'</td>'
+        +'<td style="padding:7px 8px;text-align:right;font-weight:700;color:'+(istHm>0?'var(--white)':'var(--dim)')+'">'+( istHm>0?istHm:'–')+'</td>'
+        +'<td style="padding:7px 8px;text-align:right;font-weight:700;color:'+(istHm>0?(dHm>=-50?'#1affa0':dHm>=-200?'#ffe566':'#ff5577'):'var(--dim)')+'">'+( istHm>0?(dHm>=0?'+':'')+dHm:'–')+'</td>'
+        // hf
+        +'<td style="padding:7px 8px;text-align:right;color:var(--dim)">'+(sollHr||'–')+'</td>'
+        +'<td style="padding:7px 8px;text-align:right;font-weight:700;color:'+(istHr?( istHr<=sollHr+5?'#1affa0':istHr<=sollHr+12?'#ffe566':'#ff5577'):'var(--dim)')+'">'+( istHr||'–')+'</td>'
+        // sessions
+        +'<td style="padding:7px 8px;text-align:right;font-weight:700;color:'+compCol+'">'+doneSess+'/'+totalSess+'</td>'
+        +'</tr>';
     });
   }
 
@@ -2832,16 +3249,45 @@ function renderRuns(){
     </div>
   </div>
 
-  <!-- Plan vs Ist Kurve -->
-  ${planData?`
+  <!-- Plan vs Ist Tabelle ab 1. April 2026 -->
+  ${planData && planTableRows ? `
   <div class="card" style="margin-bottom:14px">
-    <div class="card-title">📈 Trainingsplan: Soll vs. Ist (km/Woche)</div>
-    <div class="chart-wrap h160"><canvas id="planVsActCanvas"></canvas></div>
-    <div style="display:flex;gap:16px;justify-content:center;margin-top:8px;font-size:11px">
-      <span style="color:var(--accent)">■ Soll-km</span>
-      <span style="color:var(--green)">■ Ist-km</span>
+    <div class="card-title">📈 Trainingsplan: Soll vs. Ist (ab 1. April 2026)</div>
+    <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="color:var(--dim);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">
+          <th style="padding:5px 8px;text-align:left">Wo.</th>
+          <th style="padding:5px 8px;text-align:left">Datum</th>
+          <th style="padding:5px 8px;text-align:left">Phase</th>
+          <th style="padding:5px 8px;text-align:right" colspan="3">── km ──────</th>
+          <th style="padding:5px 8px;text-align:right" colspan="3">── Hm ──────</th>
+          <th style="padding:5px 8px;text-align:right" colspan="2">── Ø HF ──</th>
+          <th style="padding:5px 8px;text-align:right">EH</th>
+        </tr>
+        <tr style="color:var(--dim);font-size:10px;font-weight:600">
+          <th></th><th></th><th></th>
+          <th style="padding:3px 8px;text-align:right">Soll</th>
+          <th style="padding:3px 8px;text-align:right">Ist</th>
+          <th style="padding:3px 8px;text-align:right">Δ</th>
+          <th style="padding:3px 8px;text-align:right">Soll</th>
+          <th style="padding:3px 8px;text-align:right">Ist</th>
+          <th style="padding:3px 8px;text-align:right">Δ</th>
+          <th style="padding:3px 8px;text-align:right">Soll</th>
+          <th style="padding:3px 8px;text-align:right">Ist</th>
+          <th style="padding:3px 8px;text-align:right">✓</th>
+        </tr>
+      </thead>
+      <tbody>${planTableRows}</tbody>
+    </table>
     </div>
-  </div>`:''}
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:10px;color:var(--dim)">
+      <span><span style="color:#1affa0">■</span> auf Plan / besser</span>
+      <span><span style="color:#ffe566">■</span> leicht unter Plan</span>
+      <span><span style="color:#ff5577">■</span> deutlich unter Plan</span>
+      <span style="margin-left:8px">EH = Einheiten erledigt/geplant · Ø HF Soll = gewichteter Zonenmittelwert</span>
+    </div>
+  </div>` : ''}
 
   <!-- Monatliche km + Hm -->
   <div class="card" style="margin-bottom:14px">
@@ -2891,18 +3337,6 @@ function renderRuns(){
     var cOpts = {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
       scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#9898c0',font:{size:10}}},
                y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#9898c0',font:{size:10}}}}};
-
-    // Plan vs Actual
-    if(planData && document.getElementById('planVsActCanvas')){
-      charts['runsPlvA'] = new Chart(document.getElementById('planVsActCanvas'),{type:'bar',data:{
-        labels:wkLabels,
-        datasets:[
-          {label:'Soll',data:planWkKm,backgroundColor:'rgba(168,152,255,.3)',borderColor:'#a898ff',borderWidth:1,borderRadius:3},
-          {label:'Ist', data:actWkKm, backgroundColor:'rgba(26,255,160,.4)',borderColor:'#1affa0',borderWidth:1,borderRadius:3,
-           type:'line',fill:false,tension:.3,pointRadius:3}
-        ]
-      },options:Object.assign({},cOpts,{plugins:{legend:{display:false}}})});
-    }
 
     // Monthly km bars
     var sortedM = Object.keys(byMonth).sort().slice(-14);
