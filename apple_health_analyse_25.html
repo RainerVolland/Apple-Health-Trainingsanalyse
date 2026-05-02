@@ -2409,12 +2409,14 @@ function convertWorkoutsToPlan(workouts){
 // ── Import LLM-generated plan ─────────────────────────────────────────────────
 async function importLLMPlan(event){
   const file = event.target.files[0]; if(!file) return;
+  // Reset file input so same file can be re-imported
+  event.target.value = '';
   let incoming;
   try{
     const text = await file.text();
     incoming = JSON.parse(text);
   }catch(e){
-    showJsonSyncResult('error','❌ Ungültige JSON-Datei: '+e.message); return;
+    alert('❌ Ungültige JSON-Datei:\n'+e.message); return;
   }
 
   // Accept plan format, {plan/planVoll} wrapper, or workouts.json (flat array with startTime)
@@ -2422,24 +2424,28 @@ async function importLLMPlan(event){
   if(Array.isArray(newPlan) && newPlan.length > 0 && newPlan[0]?.startTime !== undefined && !newPlan[0]?.sessions){
     // workouts.json format — auto-convert to plan weeks
     newPlan = convertWorkoutsToPlan(newPlan);
-    showJsonSyncResult('info','ℹ️ workouts.json erkannt — automatisch in Planformat konvertiert…');
   }
   if(!Array.isArray(newPlan)||!newPlan[0]?.sessions){
-    showJsonSyncResult('error','❌ Format nicht erkannt. Erwartet: Wochen-Array mit sessions[] oder workouts.json mit startTime.'); return;
+    alert('❌ Format nicht erkannt.\n\nErwartet: Array mit Wochen-Objekten, jedes mit sessions[].\nGefunden: '+(Array.isArray(incoming)?'Array['+incoming.length+'] ohne sessions':typeof incoming));
+    return;
   }
 
   // Validate required fields
   const required = ['wk','phase','targetVol','targetLong','targetHm','note','sessions'];
   const sessRequired = ['date','type','durationMin','distKm','status'];
   for(const wk of newPlan){
-    for(const f of required) if(wk[f]===undefined){ showJsonSyncResult('error',`❌ Feld fehlt in Woche ${wk.wk||'?'}: "${f}"`); return; }
+    for(const f of required) if(wk[f]===undefined){
+      alert(`❌ Pflichtfeld fehlt in Woche ${wk.wk??'?'}: "${f}"\n\nBitte JSON prüfen.`); return;
+    }
     for(const s of wk.sessions||[]){
-      for(const f of sessRequired) if(s[f]===undefined){ showJsonSyncResult('error',`❌ Session-Feld fehlt (${s.date||'?'}): "${f}"`); return; }
+      for(const f of sessRequired) if(s[f]===undefined){
+        alert(`❌ Pflichtfeld fehlt in Session ${s.date||'?'}: "${f}"`); return;
+      }
       if(!['R','EL','M','IL','HI','LL','LLH','BTB','SIM'].includes(s.type)){
-        showJsonSyncResult('error',`❌ Unbekannter Session-Typ: "${s.type}" am ${s.date}`); return;
+        alert(`❌ Unbekannter Session-Typ: "${s.type}" am ${s.date}`); return;
       }
       if(!isWeekendOrHoliday(s.date) && s.type==='HI'){
-        showJsonSyncResult('error',`❌ HI (Berglauf) an Wochentag ohne Feiertag: ${s.date} — bitte als IL umschreiben`); return;
+        alert(`❌ HI (Berglauf) an Wochentag ohne Feiertag: ${s.date}\nBitte als IL umschreiben.`); return;
       }
     }
   }
@@ -2480,8 +2486,18 @@ async function importLLMPlan(event){
   // Bump key so old cached plan is replaced
   localStorage.removeItem(PLAN_KEY);
   savePlan(newPlan);
-  showJsonSyncResult('success',`✅ LLM-Plan geladen · ${newPlan.length} Wochen · ${Object.keys(existingByDate).length} Ist-Einträge übernommen`);
-  renderPlan();
+  console.log('[importLLMPlan] Saved', newPlan.length, 'weeks to localStorage key:', PLAN_KEY);
+
+  // Render plan first, then show result banner (renderPlan() rebuilds panel.innerHTML)
+  try{
+    renderPlan();
+  }catch(e){
+    alert('❌ Fehler beim Rendern des Plans:\n'+e.message+'\n\nPlan wurde gespeichert — bitte Seite neu laden.');
+    console.error('[renderPlan] error:', e);
+    return;
+  }
+  // Show success banner after renderPlan has rebuilt the DOM
+  showJsonSyncResult('success',`✅ Plan geladen · ${newPlan.length} Wochen · ${Object.keys(existingByDate).length} Ist-Einträge übernommen`);
 }
 
 // ── Import workouts.json and sync with plan ──────────────────────────────────
