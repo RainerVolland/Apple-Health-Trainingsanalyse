@@ -140,11 +140,11 @@
   },
   {
     "wk": 13, "phase": "Taper", "targetVol": 104, "targetLong": 100, "targetHm": 3310,
-    "note": "🏁 RACE WEEK – GO FOR IT! Zermatt Ultra 100k / 3300 hm · 30. Juli 2026",
+    "note": "🏁 RACE WEEK – GO FOR IT! Fjällmarathon / 3300 hm · 30. Juli 2026",
     "sessions": [
       {"date":"2026-07-27","dayLabel":"Mo","type":"EL","durationMin":30,"distKm":4,"hmTarget":10,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"30' Trab: 10hm · letzte Aktivierung","tips":"Nur locker einlaufen · keine Belastung · Füße lockern","time":"06:00"},
       {"date":"2026-07-28","dayLabel":"Di","type":"EL","durationMin":20,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"20' Mobilität · Ausrüstung final checken","tips":"Leichtes Dehnen · Packliste · mental vorbereiten","time":"07:00"},
-      {"date":"2026-07-30","dayLabel":"Do","type":"SIM","durationMin":840,"distKm":100,"hmTarget":3300,"hrTarget":136,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"🏆 RACE DAY: Zermatt Ultra 100k / 3300hm · Zielzeit 13–14h","tips":"START früh morgens · erste 40km konservativ · Power-Hiking bergauf · Gel alle 30 min · GENIESSE ES!","time":"05:00"}
+      {"date":"2026-07-30","dayLabel":"Do","type":"SIM","durationMin":840,"distKm":100,"hmTarget":3300,"hrTarget":136,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"🏆 RACE DAY: Fjällmarathon / 3300hm · Zielzeit 13–14h","tips":"START früh morgens · erste 40km konservativ · Power-Hiking bergauf · Gel alle 30 min · GENIESSE ES!","time":"05:00"}
     ]
   }
 ]
