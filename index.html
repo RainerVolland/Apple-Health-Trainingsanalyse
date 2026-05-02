@@ -2539,13 +2539,14 @@ function renderPlan(){
   // Load or generate plan — clear old generic plan on first load
   let planData = loadPlan();
 
-  // Validate: if any week has >4 runs (old plan), reset
+  // Validate: if any week has >7 sessions (clearly corrupt data), reset
+  // Note: new plan has up to 6 sessions/week (Di+Mi+Do+Sa+So+Mo), so threshold must be >6
   if(planData){
     const maxSessions = Math.max(...planData.map(wk =>
       wk.sessions.filter(s => s.type !== 'R').length
     ));
-    if(maxSessions > 4){
-      console.log('Old plan with', maxSessions, 'sessions/week detected — resetting');
+    if(maxSessions > 7){
+      console.log('Corrupt plan with', maxSessions, 'sessions/week detected — resetting');
       localStorage.removeItem(PLAN_KEY);
       planData = null;
     }
