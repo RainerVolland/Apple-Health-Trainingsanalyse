@@ -1,0 +1,150 @@
+[
+  {
+    "wk": 0, "phase": "Basis", "targetVol": 17, "targetLong": 17, "targetHm": 50,
+    "note": "Einlaufwoche / 30g KH/h · Sa Ruhe, So lockeres Z2",
+    "sessions": [
+      {"date":"2026-05-03","dayLabel":"So","type":"EL","durationMin":120,"distKm":17,"hmTarget":50,"hrTarget":130,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"120' Z2: 50hm / Ziel 130 bpm (Germering/Amperauen)","tips":"Locker · Z2 · nüchtern optional","time":"08:00"}
+    ]
+  },
+  {
+    "wk": 1, "phase": "Build I", "targetVol": 44, "targetLong": 16, "targetHm": 920,
+    "note": "Kraft & Stöcke / 40g KH/h · Poles einführen, Hügelsprints Di",
+    "sessions": [
+      {"date":"2026-05-05","dayLabel":"Di","type":"IL","durationMin":75,"distKm":10,"hmTarget":400,"hrTarget":155,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Hügelsprints: 400hm / Ziel 155 bpm (Parsberg)","tips":"10× kurze Sprints bergauf maximal · langer Trab bergab","time":"05:15"},
+      {"date":"2026-05-06","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Exzentrik (Gym)","tips":"Exzentrisches Einbein-Squat, Nordic Curl, Wadenheben","time":"06:00"},
+      {"date":"2026-05-07","dayLabel":"Do","type":"EL","durationMin":75,"distKm":10,"hmTarget":120,"hrTarget":132,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Z2 Trail: 120hm / Ziel 132 bpm (Germeringer See)","tips":"Z2 halten · leichter Trail · keine Intensität","time":"05:15"},
+      {"date":"2026-05-09","dayLabel":"Sa","type":"EL","durationMin":60,"distKm":8,"hmTarget":50,"hrTarget":128,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 (See): 50hm / Ziel 128 bpm","tips":"Sehr locker · Regeneration · Beine frisch halten","time":"07:00"},
+      {"date":"2026-05-10","dayLabel":"So","type":"LL","durationMin":240,"distKm":16,"hmTarget":350,"hrTarget":110,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"4h Wandern: 350hm / Ziel 110 bpm · Poles testen","tips":"Erster Poles-Einsatz · Wandertempo bergauf · Z1/Z2","time":"07:30"}
+    ]
+  },
+  {
+    "wk": 2, "phase": "Build I", "targetVol": 48, "targetLong": 20, "targetHm": 2060,
+    "note": "Vertikal-Reiz / 50g KH/h · Feiertag Herzogstand Do",
+    "sessions": [
+      {"date":"2026-05-12","dayLabel":"Di","type":"IL","durationMin":75,"distKm":10,"hmTarget":350,"hrTarget":158,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Hill Int 6×4': 350hm / Ziel 158 bpm (Parsberg)","tips":"6 × 4 min bergauf Z3–Z4 · 3 min Trab bergab","time":"05:15"},
+      {"date":"2026-05-13","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Core (Gym)","tips":"Plank-Varianten, Bird Dog, Totes Käfer, Hüft-Extensoren","time":"06:00"},
+      {"date":"2026-05-14","dayLabel":"Do","type":"LLH","durationMin":300,"distKm":20,"hmTarget":1600,"hrTarget":138,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"🎉 Feiertag Christi Himmelfahrt: 5h Herzogstand: 1600hm / Ziel 138 bpm · Poles","tips":"Großer Vertikal-Reiz · 50g KH/h testen · Stöcke · Z2 Grundlage","time":"07:00"},
+      {"date":"2026-05-15","dayLabel":"Fr","type":"EL","durationMin":45,"distKm":5,"hmTarget":10,"hrTarget":115,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Rec: 10hm / Ziel 115 bpm","tips":"Aktive Erholung · nur Z1","time":"07:00"},
+      {"date":"2026-05-16","dayLabel":"Sa","type":"LL","durationMin":120,"distKm":13,"hmTarget":100,"hrTarget":128,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"2h Hölzl Trail: 100hm / Ziel 128 bpm","tips":"Z2 locker · nach Feiertag-Tag erholen","time":"07:30"}
+    ]
+  },
+  {
+    "wk": 3, "phase": "Basis", "targetVol": 54, "targetLong": 20, "targetHm": 570,
+    "note": "Grundlage / 60g KH/h · leichtere Woche, Isar-Trails Sa",
+    "sessions": [
+      {"date":"2026-05-19","dayLabel":"Di","type":"EL","durationMin":60,"distKm":9,"hmTarget":60,"hrTarget":130,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 + Strides: 60hm / Ziel 130 bpm (Parsberg)","tips":"Locker Z2 · 6×100m Steigerungen am Ende","time":"05:15"},
+      {"date":"2026-05-20","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Beine (Gym)","tips":"Einbein-Squat, RDL, Wadenheben exzentrisch","time":"06:00"},
+      {"date":"2026-05-21","dayLabel":"Do","type":"EL","durationMin":60,"distKm":8,"hmTarget":20,"hrTarget":125,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 flach: 20hm / Ziel 125 bpm (Germeringer See)","tips":"Grundlagenausdauer · flach · entspannt","time":"05:15"},
+      {"date":"2026-05-23","dayLabel":"Sa","type":"LLH","durationMin":210,"distKm":20,"hmTarget":450,"hrTarget":135,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3,5h Isar-Trails: 450hm / Ziel 135 bpm (ab Buchenhain)","tips":"Schöne Trails · kein Tempo-Druck · Z2","time":"07:00"},
+      {"date":"2026-05-24","dayLabel":"So","type":"EL","durationMin":120,"distKm":17,"hmTarget":40,"hrTarget":130,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"120' Z2: 40hm / Ziel 130 bpm (Amperauen)","tips":"Sehr flach · ideale Grundlageneinheit","time":"08:00"}
+    ]
+  },
+  {
+    "wk": 4, "phase": "Build II", "targetVol": 83, "targetLong": 22, "targetHm": 3230,
+    "note": "B2B Belastung / 60g KH/h · Pfingstmontag Tegernsee + Wank B2B Sa",
+    "sessions": [
+      {"date":"2026-05-25","dayLabel":"Mo","type":"LLH","durationMin":240,"distKm":20,"hmTarget":1200,"hrTarget":142,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"🎉 Pfingstmontag: 4h Tegernsee: 1200hm / Ziel 142 bpm · Poles","tips":"Großer Feiertags-Tag · 60g KH/h · Stöcke · Z2–RPE5 bergauf","time":"07:00"},
+      {"date":"2026-05-26","dayLabel":"Di","type":"IL","durationMin":75,"distKm":10,"hmTarget":400,"hrTarget":155,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Hill Int: 400hm / Ziel 155 bpm (Parsberg)","tips":"Nach Pfingstmontag: Kraft-Fokus · kürzere Wiederholungen","time":"05:15"},
+      {"date":"2026-05-27","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Plyometrie (Gym)","tips":"Box Jumps, Sprungkniebeugen, Single-Leg-Hops","time":"06:00"},
+      {"date":"2026-05-28","dayLabel":"Do","type":"M","durationMin":75,"distKm":11,"hmTarget":50,"hrTarget":148,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Tempo Z3: 50hm / Ziel 148 bpm (Germeringer See)","tips":"Z3 Schwellenlauf · 3×15 min konstant","time":"05:15"},
+      {"date":"2026-05-30","dayLabel":"Sa","type":"LLH","durationMin":270,"distKm":22,"hmTarget":1500,"hrTarget":138,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"4,5h Wank B2B: 1500hm / Ziel 138 bpm · Poles","tips":"B2B Tag 1 · volle Verpflegung testen · Stöcke · 60g KH/h","time":"07:00"},
+      {"date":"2026-05-31","dayLabel":"So","type":"BTB","durationMin":150,"distKm":20,"hmTarget":80,"hrTarget":132,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"150' Z2: 80hm / Ziel 132 bpm · Poles-Test B2B Tag 2","tips":"Auf müden Beinen laufen lernen · Puls darf höher sein","time":"08:00"}
+    ]
+  },
+  {
+    "wk": 5, "phase": "Build II", "targetVol": 70, "targetLong": 35, "targetHm": 2760,
+    "note": "Race-Simulation / 70g KH/h · Fronleichnam Big Day Do",
+    "sessions": [
+      {"date":"2026-06-02","dayLabel":"Di","type":"IL","durationMin":90,"distKm":12,"hmTarget":500,"hrTarget":145,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Hügel-Kraft: 500hm / Ziel 145 bpm (Parsberg)","tips":"Kraftausdauer am Hügel · Z2 Grundgerüst + Kraft-Passagen","time":"05:15"},
+      {"date":"2026-06-03","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Quads (Gym)","tips":"Einbein-Squat exzentrisch, RDL, Wadenheben","time":"06:00"},
+      {"date":"2026-06-04","dayLabel":"Do","type":"SIM","durationMin":360,"distKm":35,"hmTarget":2000,"hrTarget":135,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"🎉 Fronleichnam: 6h Big Day Simulation: 2000hm / Ziel 135 bpm · Race-Gear","tips":"VOLLSTÄNDIGE Race-Ausrüstung · 70g KH/h testen · Stöcke · mentale Simulation","time":"05:30"},
+      {"date":"2026-06-05","dayLabel":"Fr","type":"EL","durationMin":45,"distKm":5,"hmTarget":10,"hrTarget":118,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Rec: 10hm / Ziel 118 bpm","tips":"Aktive Erholung nach Big Day · Z1 ausschließlich","time":"07:00"},
+      {"date":"2026-06-06","dayLabel":"Sa","type":"LL","durationMin":180,"distKm":18,"hmTarget":250,"hrTarget":130,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3h Parsberg/Hölzl: 250hm / Ziel 130 bpm","tips":"Locker nach der Woche · Z2 · Trail-Technik","time":"07:30"}
+    ]
+  },
+  {
+    "wk": 6, "phase": "Peak", "targetVol": 68, "targetLong": 25, "targetHm": 2850,
+    "note": "Peak-Volumen / 80g KH/h · 5,5h Berge Sa + B2B So · 1800 hm sammeln",
+    "sessions": [
+      {"date":"2026-06-09","dayLabel":"Di","type":"EL","durationMin":90,"distKm":13,"hmTarget":150,"hrTarget":132,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Z2 Trail Gilching: 150hm / Ziel 132 bpm","tips":"Ausdauer-Grundlage · locker · Beine schonen","time":"05:15"},
+      {"date":"2026-06-10","dayLabel":"Mi","type":"EL","durationMin":60,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Kraft: Exzentrik (Gym)","tips":"Downhill-Vorbereitung: exzentrisches Quad/Waden-Training","time":"06:00"},
+      {"date":"2026-06-11","dayLabel":"Do","type":"IL","durationMin":90,"distKm":10,"hmTarget":800,"hrTarget":158,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Hill Int (Laufband mgl.): 800hm / Ziel 158 bpm","tips":"Z4-Passagen bergauf · Laufband 8–10% alternativ","time":"05:15"},
+      {"date":"2026-06-13","dayLabel":"Sa","type":"LLH","durationMin":330,"distKm":25,"hmTarget":1800,"hrTarget":140,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"5,5h Berge: 1800hm / Ziel 140 bpm · Ziel 1800 hm!","tips":"80g KH/h · Stöcke · Rennpace-Simulation bergauf","time":"06:30"},
+      {"date":"2026-06-14","dayLabel":"So","type":"BTB","durationMin":180,"distKm":20,"hmTarget":100,"hrTarget":135,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3h B2B Z2: 100hm / Ziel 135 bpm · müde Beine","tips":"B2B Tag 2 · sehr locker Z1/Z2 · Fatigue-Management","time":"08:00"}
+    ]
+  },
+  {
+    "wk": 7, "phase": "Deload", "targetVol": 37, "targetLong": 16, "targetHm": 300,
+    "note": "Regenerations-Woche / 30g KH/h · kein Druck · Körper erholen",
+    "sessions": [
+      {"date":"2026-06-16","dayLabel":"Di","type":"EL","durationMin":60,"distKm":9,"hmTarget":80,"hrTarget":140,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 + Sprints: 80hm / Ziel 140 bpm (Parsberg)","tips":"Sehr locker · nur kurze Sprints zum Schluss · Neuroaktivierung","time":"05:15"},
+      {"date":"2026-06-17","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Erhaltung (Gym)","tips":"Nur Mobilität + leichte Kräftigung · kein Muskelkater","time":"06:00"},
+      {"date":"2026-06-18","dayLabel":"Do","type":"EL","durationMin":60,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Mobilität (Germeringer See)","tips":"Rollen, Dehnen, Atemübungen · mentale Pause","time":"05:15"},
+      {"date":"2026-06-20","dayLabel":"Sa","type":"LL","durationMin":150,"distKm":16,"hmTarget":200,"hrTarget":128,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"2,5h Trail moderat: 200hm / Ziel 128 bpm","tips":"Genusslauf · keine Intensität · Z2","time":"07:30"},
+      {"date":"2026-06-21","dayLabel":"So","type":"EL","durationMin":90,"distKm":12,"hmTarget":20,"hrTarget":122,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Z2 flach: 20hm / Ziel 122 bpm","tips":"Lockeres Abschließen der Deload-Woche","time":"08:00"}
+    ]
+  },
+  {
+    "wk": 8, "phase": "Peak", "targetVol": 75, "targetLong": 28, "targetHm": 3000,
+    "note": "Spezifität & Magen / 90g KH/h · 6,5h Berge Sa + B2B So",
+    "sessions": [
+      {"date":"2026-06-23","dayLabel":"Di","type":"IL","durationMin":90,"distKm":12,"hmTarget":500,"hrTarget":162,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Hill Int 4×10': 500hm / Ziel 162 bpm (Parsberg)","tips":"Längere Intervalle · Z3–Z4 bergauf · mental stark bleiben","time":"05:15"},
+      {"date":"2026-06-24","dayLabel":"Mi","type":"EL","durationMin":60,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Kraft: Fokus Downhill (Gym)","tips":"Exzentrische Quads & Waden – Downhill-Schutz","time":"06:00"},
+      {"date":"2026-06-25","dayLabel":"Do","type":"IL","durationMin":90,"distKm":13,"hmTarget":100,"hrTarget":145,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Tempo-Wechsel: 100hm / Ziel 145 bpm (Germeringer See)","tips":"Fahrtspiel: 5 min Z2 / 5 min Z4 im Wechsel","time":"05:15"},
+      {"date":"2026-06-27","dayLabel":"Sa","type":"LLH","durationMin":390,"distKm":28,"hmTarget":2200,"hrTarget":138,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"6,5h Berge: 2200hm / Ziel 138 bpm · volle Verpflegung + Poles","tips":"VOLLE Simulation: Rucksack, 90g KH/h, Stöcke · Race-Pace bergauf testen","time":"06:00"},
+      {"date":"2026-06-28","dayLabel":"So","type":"BTB","durationMin":210,"distKm":22,"hmTarget":200,"hrTarget":134,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3,5h B2B Trail: 200hm / Ziel 134 bpm · sehr müde Beine","tips":"Fatigue-Management · mental > physisch · Schritt für Schritt","time":"08:00"}
+    ]
+  },
+  {
+    "wk": 9, "phase": "Peak", "targetVol": 63, "targetLong": 22, "targetHm": 2390,
+    "note": "Vor-Peak-Phase / 70g KH/h · Technik-Fokus",
+    "sessions": [
+      {"date":"2026-06-30","dayLabel":"Di","type":"IL","durationMin":90,"distKm":12,"hmTarget":550,"hrTarget":148,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Kraftausdauer: 550hm / Ziel 148 bpm (Parsberg)","tips":"Mittellanges Intervall · Kraft-Fokus · bergab Technik","time":"05:15"},
+      {"date":"2026-07-01","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Core (Gym)","tips":"Core-Stabilität · Anti-Rotation für lange Läufe","time":"06:00"},
+      {"date":"2026-07-02","dayLabel":"Do","type":"M","durationMin":90,"distKm":13,"hmTarget":300,"hrTarget":135,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Trail technisch: 300hm / Ziel 135 bpm (Germeringer See)","tips":"Technik-Fokus · saubere Fußlandung · Kadenz 180+","time":"05:15"},
+      {"date":"2026-07-04","dayLabel":"Sa","type":"LLH","durationMin":240,"distKm":22,"hmTarget":1500,"hrTarget":135,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"4h Berge: 1500hm / Ziel 135 bpm · Technik-Fokus","tips":"Downhill-Technik · kürzere Schritte bergab · Stöckeinsatz optimieren","time":"07:00"},
+      {"date":"2026-07-05","dayLabel":"So","type":"EL","durationMin":120,"distKm":16,"hmTarget":40,"hrTarget":128,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"2h Z2 locker: 40hm / Ziel 128 bpm","tips":"Regeneration · Z1/Z2 · mentale Frische","time":"08:00"}
+    ]
+  },
+  {
+    "wk": 10, "phase": "Peak", "targetVol": 82, "targetLong": 32, "targetHm": 3480,
+    "note": "LETZTER PEAK / 90g KH/h · 7h Berge Sa Finale + B2B So",
+    "sessions": [
+      {"date":"2026-07-07","dayLabel":"Di","type":"IL","durationMin":90,"distKm":12,"hmTarget":600,"hrTarget":160,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Hill Int 3×15': 600hm / Ziel 160 bpm (Parsberg/Laufband?)","tips":"Langer Intervall-Reiz · Laufband 10% Steigung alternativ","time":"05:15"},
+      {"date":"2026-07-08","dayLabel":"Mi","type":"EL","durationMin":60,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Kraft: Peak-Reiz (Gym)","tips":"Letzter schwerer Kraft-Stimulus vor dem Taper","time":"06:00"},
+      {"date":"2026-07-09","dayLabel":"Do","type":"EL","durationMin":90,"distKm":13,"hmTarget":80,"hrTarget":132,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Z2 + Steigerungen: 80hm / Ziel 132 bpm (Germeringer See)","tips":"Locker + 6×100m Steigerungen · Beine frisch für Sa","time":"05:15"},
+      {"date":"2026-07-11","dayLabel":"Sa","type":"LLH","durationMin":420,"distKm":32,"hmTarget":2500,"hrTarget":136,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"7h Berge (Finale Peak): 2500hm / Ziel 136 bpm · LETZTER LANGER PEAK","tips":"Alles rauslassen · 90g KH/h · volle Ausrüstung · letzter großer Stimulus","time":"05:30"},
+      {"date":"2026-07-12","dayLabel":"So","type":"BTB","durationMin":240,"distKm":25,"hmTarget":300,"hrTarget":132,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"4h B2B: 300hm / Ziel 132 bpm · letzter B2B","tips":"LETZTER B2B · Fatigue-Management · mental trainieren","time":"08:00"}
+    ]
+  },
+  {
+    "wk": 11, "phase": "Taper", "targetVol": 48, "targetLong": 20, "targetHm": 850,
+    "note": "Tapering Start / 60g KH/h · Volumen –40% · Schärfe erhalten",
+    "sessions": [
+      {"date":"2026-07-14","dayLabel":"Di","type":"IL","durationMin":60,"distKm":8,"hmTarget":300,"hrTarget":155,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Hill Int spritzig: 300hm / Ziel 155 bpm (Parsberg)","tips":"Kurze aber intensive Wiederholungen · Schärfe erhalten · keine Überlastung","time":"05:15"},
+      {"date":"2026-07-15","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Erhaltung (Gym)","tips":"Nur Erhaltungsvolumen · kein neuer Stimulus","time":"06:00"},
+      {"date":"2026-07-16","dayLabel":"Do","type":"EL","durationMin":60,"distKm":8,"hmTarget":20,"hrTarget":125,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 flach: 20hm / Ziel 125 bpm (Germeringer See)","tips":"Locker · Taper-Nervosität aushalten","time":"05:15"},
+      {"date":"2026-07-18","dayLabel":"Sa","type":"LLH","durationMin":210,"distKm":20,"hmTarget":500,"hrTarget":130,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3,5h Trail (Ausrüstungstest): 500hm / Ziel 130 bpm · Poles final","tips":"Race-Schuhe + Poles finaler Test · Z2 · Verpflegung testen","time":"07:00"},
+      {"date":"2026-07-19","dayLabel":"So","type":"EL","durationMin":90,"distKm":12,"hmTarget":30,"hrTarget":124,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Z2: 30hm / Ziel 124 bpm","tips":"Letzte längere Einheit · locker · Vertrauen aufbauen","time":"08:00"}
+    ]
+  },
+  {
+    "wk": 12, "phase": "Taper", "targetVol": 27, "targetLong": 13, "targetHm": 260,
+    "note": "Frische gewinnen / 40g KH/h · Volumen –60% · Race-Schuhe einlaufen",
+    "sessions": [
+      {"date":"2026-07-21","dayLabel":"Di","type":"EL","durationMin":45,"distKm":7,"hmTarget":40,"hrTarget":128,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Z2 + Strides: 40hm / Ziel 128 bpm (Parsberg)","tips":"Sehr locker + 6×20'' Strides · Beine leicht halten","time":"05:15"},
+      {"date":"2026-07-22","dayLabel":"Mi","type":"EL","durationMin":30,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"30' Mobilität (Gym)","tips":"Yoga-Einheit · kein Kraftstress mehr","time":"06:00"},
+      {"date":"2026-07-23","dayLabel":"Do","type":"EL","durationMin":45,"distKm":7,"hmTarget":20,"hrTarget":120,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Z2 locker: 20hm / Ziel 120 bpm (Germeringer See)","tips":"Lockerer kurzer Trab · Beine schonen","time":"05:15"},
+      {"date":"2026-07-25","dayLabel":"Sa","type":"LL","durationMin":120,"distKm":13,"hmTarget":200,"hrTarget":125,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"2h Trail (Race Shoes): 200hm / Ziel 125 bpm · Schuhe einlaufen","tips":"Race-Day-Ausrüstung final testen · 2× 20 min Z2","time":"07:30"}
+    ]
+  },
+  {
+    "wk": 13, "phase": "Taper", "targetVol": 104, "targetLong": 100, "targetHm": 3310,
+    "note": "🏁 RACE WEEK – GO FOR IT! Zermatt Ultra 100k / 3300 hm · 30. Juli 2026",
+    "sessions": [
+      {"date":"2026-07-27","dayLabel":"Mo","type":"EL","durationMin":30,"distKm":4,"hmTarget":10,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"30' Trab: 10hm · letzte Aktivierung","tips":"Nur locker einlaufen · keine Belastung · Füße lockern","time":"06:00"},
+      {"date":"2026-07-28","dayLabel":"Di","type":"EL","durationMin":20,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"20' Mobilität · Ausrüstung final checken","tips":"Leichtes Dehnen · Packliste · mental vorbereiten","time":"07:00"},
+      {"date":"2026-07-30","dayLabel":"Do","type":"SIM","durationMin":840,"distKm":100,"hmTarget":3300,"hrTarget":136,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"🏆 RACE DAY: Zermatt Ultra 100k / 3300hm · Zielzeit 13–14h","tips":"START früh morgens · erste 40km konservativ · Power-Hiking bergauf · Gel alle 30 min · GENIESSE ES!","time":"05:00"}
+    ]
+  }
+]

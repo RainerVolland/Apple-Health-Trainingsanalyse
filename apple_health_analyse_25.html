@@ -2721,42 +2721,88 @@ function renderPlan(){
       </div>
     </div>
     ${planData.map(wk=>{
-      const phaseColors={Basis:'#33ddff',Aufbau:'#1affa0',Build:'#ffe566',Peak:'#ffaa55',Taper:'#a898ff'};
+      const phaseColors={'Basis':'#33ddff','Aufbau':'#1affa0','Build I':'#ffe566','Build II':'#ffcc44','Build':'#ffe566','Deload':'#33ddff','Peak':'#ffaa55','Taper':'#a898ff'};
       const col=phaseColors[wk.phase]||'#a898ff';
-      const wkSess=wk.sessions.filter(s=>s.type!=='R');
+      const wkSess=wk.sessions.filter(s=>s.type!=='R'||s.distKm>0);
       const wkDone=wkSess.filter(s=>s.status==='done').length;
+      const wkMissed=wkSess.filter(s=>s.status==='missed').length;
       const isCur=wk.wk===curWk;
       const isPast=wk.sessions.every(s=>s.date<today);
+      const compliance=wkSess.length?wkDone/wkSess.length:0;
+      const compCol=isPast?(compliance>=1?'#1affa0':compliance>=.5?'#ffe566':'#ff5577'):'var(--dim)';
+      const wkDate=new Date(wk.sessions[0].date).toLocaleDateString('de-DE',{day:'numeric',month:'short'});
       return `
-      <div class="week-row" style="${isCur?'background:rgba(168,152,255,.05);border-radius:8px;padding:12px 8px;margin:-4px -8px;':'opacity:'+(!isPast||isCur?1:.65)+';'}">
-        <div>
-          <div class="week-num">W${wk.wk}</div>
-          <div style="font-size:10px;color:var(--dim)">${new Date(wk.sessions[0].date).toLocaleDateString('de-DE',{day:'numeric',month:'short'})}</div>
+      <div style="margin-bottom:14px;border:1px solid ${isCur?'rgba(168,152,255,.35)':'rgba(255,255,255,.07)'};border-radius:10px;overflow:hidden;${isPast&&!isCur?'opacity:.75':''}">
+        <!-- Week header -->
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;background:${isCur?'rgba(168,152,255,.12)':'rgba(255,255,255,.03)'};border-bottom:1px solid rgba(255,255,255,.07)">
+          <div style="font-size:15px;font-weight:800;color:${isCur?'var(--accent)':'var(--white)'}">W${wk.wk}${isCur?' ←':''}</div>
+          <div style="font-size:11px;color:var(--dim)">${wkDate}</div>
+          <span style="font-size:11px;font-weight:700;color:${col};background:rgba(255,255,255,.06);padding:2px 9px;border-radius:99px;border:1px solid ${col}33">${wk.phase}</span>
+          <span style="font-size:11px;color:var(--dim)">Ziel: <strong style="color:var(--white)">${wk.targetVol}km</strong> · <strong style="color:var(--yellow)">${wk.targetHm}hm</strong></span>
+          <div style="margin-left:auto;font-size:12px;font-weight:700;color:${compCol}">${wkDone}/${wkSess.length} ✓${wkMissed>0?' · '+wkMissed+' ✗':''}</div>
         </div>
-        <div>
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
-            <span style="font-size:11px;font-weight:700;color:${col};background:rgba(255,255,255,.05);padding:2px 8px;border-radius:99px">${wk.phase}</span>
-            <span style="font-size:11px;color:var(--dim)">${wk.targetVol}km · ${wk.targetLong}km Long · ${wk.targetHm}hm</span>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;gap:3px">
-            ${wk.sessions.filter(s=>s.type!=='R').map(s=>{
-              const sType=ST[s.type]||{emoji:'▪️'};
-              const isToday=s.date===today;
-              let bg='rgba(255,255,255,.05)', color='var(--dim)';
-              if(s.status==='done'){bg='rgba(26,255,160,.12)';color='#1affa0';}
-              else if(s.status==='missed'){bg='rgba(255,85,119,.1)';color='#ff5577';}
-              else if(isToday){bg='var(--accent)';color='#fff';}
-              return `<button style="background:${bg};color:${color};border:none;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;margin:2px"
-                onclick="editSession('${s.date}')" title="${s.date} · ${s.time} · ${s.durationMin}min${s.distKm?' · '+s.distKm+'km':''}">
-                ${sType.emoji} ${s.dayLabel}</button>`;
-            }).join('')}
-          </div>
-          <div style="font-size:11px;color:var(--dim);margin-top:4px;font-style:italic">${wk.note}</div>
-        </div>
-        <div style="text-align:right;min-width:40px">
-          <div style="font-size:12px;font-weight:700;color:${wkDone===wkSess.length&&wkSess.length>0?'var(--green)':'var(--dim)'}">${wkDone}/${wkSess.length}</div>
-          ${isCur?`<div style="font-size:10px;color:var(--accent)">← Jetzt</div>`:''}
-        </div>
+        <!-- Sessions table -->
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.3);background:rgba(255,255,255,.02)">
+              <th style="padding:5px 10px;text-align:left">Tag</th>
+              <th style="padding:5px 8px;text-align:left">Einheit</th>
+              <th style="padding:5px 8px;text-align:left">Soll</th>
+              <th style="padding:5px 8px;text-align:center">Status</th>
+              <th style="padding:5px 8px;text-align:right">Ist km</th>
+              <th style="padding:5px 8px;text-align:right">Ist hm</th>
+              <th style="padding:5px 8px;text-align:right">Ø HF</th>
+              <th style="padding:5px 8px;text-align:center"></th>
+            </tr>
+          </thead>
+          <tbody>
+          ${wkSess.map((s,si)=>{
+            const sType=ST[s.type]||{emoji:'▪️',label:s.type};
+            const isToday=s.date===today;
+            const isPastDay=s.date<today;
+            let rowBg='transparent';
+            let statusBadge='';
+            if(isToday){ rowBg='rgba(168,152,255,.07)'; statusBadge='<span style="background:var(--accent);color:#fff;padding:2px 8px;border-radius:4px;font-weight:700;font-size:10px">HEUTE</span>'; }
+            else if(s.status==='done'){ rowBg='rgba(26,255,160,.04)'; statusBadge='<span style="color:#1affa0;font-weight:700;font-size:13px">✅</span>'; }
+            else if(s.status==='missed'){ rowBg='rgba(255,85,119,.05)'; statusBadge='<span style="color:#ff5577;font-weight:700;font-size:13px">❌</span>'; }
+            else if(isPastDay){ rowBg='rgba(255,170,0,.04)'; statusBadge='<span style="color:#ffaa55;font-weight:700;font-size:11px">⚠️</span>'; }
+            else { statusBadge='<span style="color:rgba(255,255,255,.2);font-size:11px">○</span>'; }
+            const doneKm=s.actualKm!=null?s.actualKm.toFixed(1):'–';
+            const doneHm=s.actualHm!=null?s.actualHm:'–';
+            const doneHr=s.actualHr!=null?s.actualHr:'–';
+            const kmDiff=s.actualKm!=null&&s.distKm!=null?(s.actualKm-s.distKm).toFixed(1):null;
+            const hmDiff=s.actualHm!=null&&s.hmTarget?(s.actualHm-s.hmTarget):null;
+            return `<tr style="background:${rowBg};border-top:1px solid rgba(255,255,255,.04)" onclick="editSession('${s.date}')" title="Klicken zum Bearbeiten">
+              <td style="padding:7px 10px;white-space:nowrap">
+                <span style="font-weight:700;color:${isToday?'var(--accent)':'var(--white)'}">${s.dayLabel}</span>
+                <span style="color:rgba(255,255,255,.3);font-size:10px;margin-left:4px">${s.date.slice(5).replace('-','.')}</span>
+              </td>
+              <td style="padding:7px 8px">
+                <span style="font-size:15px">${sType.emoji}</span>
+                <span style="font-weight:700;color:var(--white);margin-left:4px">${sType.label}</span>
+              </td>
+              <td style="padding:7px 8px;color:rgba(255,255,255,.55);font-size:11px;max-width:200px">
+                ${s.durationMin}min${s.distKm?' · '+s.distKm+'km':''}${s.hmTarget?' · '+s.hmTarget+'hm':''}
+                ${s.note?'<br><span style="color:rgba(255,255,255,.3);font-size:10px">'+s.note+'</span>':''}
+              </td>
+              <td style="padding:7px 8px;text-align:center">${statusBadge}</td>
+              <td style="padding:7px 8px;text-align:right;font-weight:700;color:${s.actualKm!=null?(kmDiff>=0?'#1affa0':kmDiff>=-2?'#ffe566':'#ff5577'):'rgba(255,255,255,.25)'}">
+                ${doneKm}${kmDiff!=null?'<br><span style="font-size:10px">'+(kmDiff>=0?'+':'')+kmDiff+'</span>':''}
+              </td>
+              <td style="padding:7px 8px;text-align:right;font-weight:700;color:${s.actualHm!=null?(hmDiff>=0||hmDiff>-100?'#1affa0':hmDiff>-300?'#ffe566':'#ff5577'):'rgba(255,255,255,.25)'}">
+                ${doneHm}${hmDiff!=null?'<br><span style="font-size:10px">'+(hmDiff>=0?'+':'')+hmDiff+'</span>':''}
+              </td>
+              <td style="padding:7px 8px;text-align:right;font-weight:700;color:${s.actualHr!=null?'#ff8888':'rgba(255,255,255,.25)'}">
+                ${doneHr}${s.actualHr&&s.actualHr>130?'<span style="color:#ffe566;font-size:10px"> Z3+</span>':''}
+              </td>
+              <td style="padding:7px 8px;text-align:center">
+                <button onclick="event.stopPropagation();editSession('${s.date}')" style="background:rgba(168,152,255,.15);border:1px solid rgba(168,152,255,.3);border-radius:6px;color:var(--accent);padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer">✏️</button>
+              </td>
+            </tr>`;
+          }).join('')}
+          </tbody>
+        </table>
+        ${wk.note?`<div style="padding:6px 14px 8px;font-size:11px;color:rgba(255,255,255,.4);font-style:italic;border-top:1px solid rgba(255,255,255,.04)">💡 ${wk.note}</div>`:''}
       </div>`;
     }).join('')}
   </div>`;
