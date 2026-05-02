@@ -3,148 +3,148 @@
     "wk": 0, "phase": "Basis", "targetVol": 16, "targetLong": 16, "targetHm": 50,
     "note": "Sanfter Einstieg · KH: 30g/h",
     "sessions": [
-      {"date":"2026-05-03","dayLabel":"So","type":"EL","durationMin":120,"distKm":16,"hmTarget":50,"hrTarget":130,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"120' Z2: 50hm / Ziel 130 bpm","tips":null,"time":"08:00"}
+      {"date":"2026-05-03","dayLabel":"So","type":"EL","durationMin":120,"distKm":16,"hmTarget":50,"hrTarget":122,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"120' Z2: 50hm / Ziel 122 bpm","tips":null,"time":"08:00"}
     ]
   },
   {
     "wk": 1, "phase": "Basis", "targetVol": 39, "targetLong": 14, "targetHm": 920,
     "note": "Erster voller Aufbau · KH: 40g/h",
     "sessions": [
-      {"date":"2026-05-05","dayLabel":"Di","type":"IL","durationMin":75,"distKm":8,"hmTarget":400,"hrTarget":155,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Hügelsprints: 400hm / Ziel 155 bpm","tips":"Parsberg · kurze Sprints bergauf · lockeres Ablaufen bergab","time":"05:30"},
+      {"date":"2026-05-05","dayLabel":"Di","type":"IL","durationMin":75,"distKm":8,"hmTarget":400,"hrTarget":148,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Hügelsprints: 400hm / Ziel 148 bpm","tips":"Parsberg · kurze Sprints bergauf · lockeres Ablaufen bergab","time":"05:30"},
       {"date":"2026-05-06","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Exzentrik","tips":null,"time":"06:00"},
-      {"date":"2026-05-07","dayLabel":"Do","type":"EL","durationMin":75,"distKm":9,"hmTarget":120,"hrTarget":132,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Z2 Trail: 120hm / Ziel 132 bpm","tips":null,"time":"05:30"},
-      {"date":"2026-05-09","dayLabel":"Sa","type":"EL","durationMin":60,"distKm":8,"hmTarget":50,"hrTarget":128,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 (See): 50hm / Ziel 128 bpm","tips":null,"time":"07:00"},
-      {"date":"2026-05-10","dayLabel":"So","type":"EL","durationMin":240,"distKm":14,"hmTarget":350,"hrTarget":110,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"4h Wandern: 350hm / Ziel 110 bpm","tips":"Locker · Z1 · aktive Erholung","time":"08:00"}
+      {"date":"2026-05-07","dayLabel":"Do","type":"EL","durationMin":75,"distKm":9,"hmTarget":120,"hrTarget":125,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Z2 Trail: 120hm / Ziel 125 bpm","tips":null,"time":"05:30"},
+      {"date":"2026-05-09","dayLabel":"Sa","type":"EL","durationMin":60,"distKm":8,"hmTarget":50,"hrTarget":120,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 (See): 50hm / Ziel 120 bpm","tips":null,"time":"07:00"},
+      {"date":"2026-05-10","dayLabel":"So","type":"EL","durationMin":240,"distKm":14,"hmTarget":350,"hrTarget":100,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"4h Wandern: 350hm / Ziel 100 bpm","tips":"Locker · Z1 · aktive Erholung","time":"08:00"}
     ]
   },
   {
     "wk": 2, "phase": "Build I", "targetVol": 50, "targetLong": 22, "targetHm": 2060,
     "note": "Herzogstand-Woche · Feiertag Do · KH: 50g/h",
     "sessions": [
-      {"date":"2026-05-12","dayLabel":"Di","type":"IL","durationMin":75,"distKm":8,"hmTarget":350,"hrTarget":158,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Hill Int 6×4': 350hm / Ziel 158 bpm","tips":"Parsberg · 6×4 min bergauf hart · 2 min locker runter","time":"05:30"},
+      {"date":"2026-05-12","dayLabel":"Di","type":"IL","durationMin":75,"distKm":8,"hmTarget":350,"hrTarget":152,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Hill Int 6×4': 350hm / Ziel 152 bpm","tips":"Parsberg · 6×4 min bergauf hart · 2 min locker runter","time":"05:30"},
       {"date":"2026-05-13","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Core","tips":null,"time":"06:00"},
-      {"date":"2026-05-14","dayLabel":"Do","type":"LLH","durationMin":300,"distKm":22,"hmTarget":1600,"hrTarget":138,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"5h Herzogstand: 1600hm / Ziel 138 bpm · Christi Himmelfahrt","tips":"Feiertag · Stöcke · Z2 bergauf · Verpflegung planen","time":"06:00"},
-      {"date":"2026-05-15","dayLabel":"Fr","type":"EL","durationMin":45,"distKm":5,"hmTarget":10,"hrTarget":115,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Rec: 10hm / Ziel 115 bpm","tips":"Lockere Erholung nach Herzogstand","time":"07:00"},
-      {"date":"2026-05-16","dayLabel":"Sa","type":"LL","durationMin":120,"distKm":15,"hmTarget":100,"hrTarget":128,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"2h Hölzl Trail: 100hm / Ziel 128 bpm","tips":null,"time":"07:00"}
+      {"date":"2026-05-14","dayLabel":"Do","type":"LLH","durationMin":300,"distKm":22,"hmTarget":1600,"hrTarget":134,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"5h Herzogstand: 1600hm / Ziel 134 bpm · Christi Himmelfahrt","tips":"Feiertag · Stöcke · Z2 bergauf · Verpflegung planen","time":"06:00"},
+      {"date":"2026-05-15","dayLabel":"Fr","type":"EL","durationMin":45,"distKm":5,"hmTarget":0,"hrTarget":110,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Rec: Ziel 110 bpm","tips":"Lockere Erholung nach Herzogstand","time":"07:00"},
+      {"date":"2026-05-16","dayLabel":"Sa","type":"LL","durationMin":120,"distKm":15,"hmTarget":100,"hrTarget":124,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"2h Hölzl Trail: 100hm / Ziel 124 bpm","tips":null,"time":"07:00"}
     ]
   },
   {
     "wk": 3, "phase": "Build I", "targetVol": 50, "targetLong": 18, "targetHm": 570,
     "note": "Technische Woche · KH: 60g/h",
     "sessions": [
-      {"date":"2026-05-19","dayLabel":"Di","type":"EL","durationMin":60,"distKm":8,"hmTarget":60,"hrTarget":130,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 + Strides: 60hm / Ziel 130 bpm","tips":"Parsberg · Z2 mit 4–6 Strides à 20 sek am Ende","time":"05:30"},
+      {"date":"2026-05-19","dayLabel":"Di","type":"EL","durationMin":60,"distKm":8,"hmTarget":60,"hrTarget":122,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 + Strides: 60hm / Ziel 122 bpm","tips":"Parsberg · Z2 mit 4–6 Strides à 20 sek am Ende","time":"05:30"},
       {"date":"2026-05-20","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Beine","tips":null,"time":"06:00"},
-      {"date":"2026-05-21","dayLabel":"Do","type":"EL","durationMin":60,"distKm":8,"hmTarget":20,"hrTarget":125,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 flach: 20hm / Ziel 125 bpm","tips":null,"time":"05:30"},
-      {"date":"2026-05-23","dayLabel":"Sa","type":"LLH","durationMin":210,"distKm":18,"hmTarget":450,"hrTarget":135,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3,5h Isar-Trails: 450hm / Ziel 135 bpm","tips":null,"time":"06:30"},
-      {"date":"2026-05-24","dayLabel":"So","type":"EL","durationMin":120,"distKm":16,"hmTarget":40,"hrTarget":130,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"120' Z2: 40hm / Ziel 130 bpm","tips":null,"time":"08:00"}
+      {"date":"2026-05-21","dayLabel":"Do","type":"EL","durationMin":60,"distKm":8,"hmTarget":20,"hrTarget":118,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 flach: 20hm / Ziel 118 bpm","tips":null,"time":"05:30"},
+      {"date":"2026-05-23","dayLabel":"Sa","type":"LLH","durationMin":210,"distKm":18,"hmTarget":450,"hrTarget":128,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3,5h Isar-Trails: 450hm / Ziel 128 bpm","tips":null,"time":"06:30"},
+      {"date":"2026-05-24","dayLabel":"So","type":"EL","durationMin":120,"distKm":16,"hmTarget":40,"hrTarget":124,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"120' Z2: 40hm / Ziel 124 bpm","tips":null,"time":"08:00"}
     ]
   },
   {
     "wk": 4, "phase": "Build II", "targetVol": 76, "targetLong": 20, "targetHm": 3230,
     "note": "Pfingstmontag Tegernsee + B2B-Wochenende · KH: 60g/h",
     "sessions": [
-      {"date":"2026-05-25","dayLabel":"Mo","type":"LLH","durationMin":240,"distKm":18,"hmTarget":1200,"hrTarget":142,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"4h Tegernsee: 1200hm / Ziel 142 bpm · Pfingstmontag","tips":"Feiertag · Stöcke · Z2/Z3 mix bergauf","time":"06:00"},
-      {"date":"2026-05-26","dayLabel":"Di","type":"IL","durationMin":75,"distKm":8,"hmTarget":400,"hrTarget":155,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Hill Int: 400hm / Ziel 155 bpm","tips":"Parsberg · nach Pfingstmontag-Berg · Beine aktivieren","time":"05:30"},
+      {"date":"2026-05-25","dayLabel":"Mo","type":"LLH","durationMin":240,"distKm":18,"hmTarget":1200,"hrTarget":136,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"4h Tegernsee: 1200hm / Ziel 136 bpm · Pfingstmontag","tips":"Feiertag · Stöcke · Z2/Z3 mix bergauf","time":"06:00"},
+      {"date":"2026-05-26","dayLabel":"Di","type":"IL","durationMin":75,"distKm":8,"hmTarget":400,"hrTarget":150,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Hill Int: 400hm / Ziel 150 bpm","tips":"Parsberg · nach Pfingstmontag-Berg · Beine aktivieren","time":"05:30"},
       {"date":"2026-05-27","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Plyo","tips":null,"time":"06:00"},
-      {"date":"2026-05-28","dayLabel":"Do","type":"M","durationMin":75,"distKm":10,"hmTarget":50,"hrTarget":148,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Tempo Z3: 50hm / Ziel 148 bpm","tips":"Erster Tempo-Block · Z3 halten · nicht überpacen","time":"05:30"},
-      {"date":"2026-05-30","dayLabel":"Sa","type":"LLH","durationMin":270,"distKm":20,"hmTarget":1500,"hrTarget":138,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"4,5h Wank B2B: 1500hm / Ziel 138 bpm","tips":"Tag 1 von B2B · Stöcke · Z2 · Beine schonen für So","time":"06:00"},
-      {"date":"2026-05-31","dayLabel":"So","type":"EL","durationMin":150,"distKm":20,"hmTarget":80,"hrTarget":132,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"150' Z2: 80hm / Ziel 132 bpm · B2B Tag 2","tips":"Müde Beine bewusst laufen · Z2 halten","time":"08:00"}
+      {"date":"2026-05-28","dayLabel":"Do","type":"M","durationMin":75,"distKm":10,"hmTarget":50,"hrTarget":138,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"75' Tempo Z3: 50hm / Ziel 138 bpm","tips":"Erster Tempo-Block · Z3 halten · nicht überpacen","time":"05:30"},
+      {"date":"2026-05-30","dayLabel":"Sa","type":"LLH","durationMin":270,"distKm":20,"hmTarget":1500,"hrTarget":132,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"4,5h Wank B2B: 1500hm / Ziel 132 bpm","tips":"Tag 1 von B2B · Stöcke · Z2 · Beine schonen für So","time":"06:00"},
+      {"date":"2026-05-31","dayLabel":"So","type":"EL","durationMin":150,"distKm":20,"hmTarget":80,"hrTarget":126,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"150' Z2: 80hm / Ziel 126 bpm · B2B Tag 2","tips":"Müde Beine bewusst laufen · Z2 halten","time":"08:00"}
     ]
   },
   {
     "wk": 5, "phase": "Build II", "targetVol": 63, "targetLong": 28, "targetHm": 2760,
     "note": "Big Day Simulation Fronleichnam · KH: 70g/h",
     "sessions": [
-      {"date":"2026-06-02","dayLabel":"Di","type":"IL","durationMin":90,"distKm":9,"hmTarget":500,"hrTarget":145,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Hügel-Kraft: 500hm / Ziel 145 bpm","tips":"Parsberg · Hügelsprints + Kraftelemente bergauf","time":"05:30"},
+      {"date":"2026-06-02","dayLabel":"Di","type":"IL","durationMin":90,"distKm":9,"hmTarget":500,"hrTarget":142,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Hügel-Kraft: 500hm / Ziel 142 bpm","tips":"Parsberg · Hügelsprints + Kraftelemente bergauf","time":"05:30"},
       {"date":"2026-06-03","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Quads","tips":null,"time":"06:00"},
-      {"date":"2026-06-04","dayLabel":"Do","type":"SIM","durationMin":360,"distKm":28,"hmTarget":2000,"hrTarget":135,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"6h Big Day Sim: 2000hm / Ziel 135 bpm · Fronleichnam","tips":"Feiertag · Stöcke · Race-Nutrition üben · Gel alle 30 min","time":"05:00"},
-      {"date":"2026-06-05","dayLabel":"Fr","type":"EL","durationMin":45,"distKm":5,"hmTarget":10,"hrTarget":118,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Rec: 10hm / Ziel 118 bpm","tips":"Lockere Erholung nach Big Day","time":"07:00"},
-      {"date":"2026-06-07","dayLabel":"Sa","type":"LLH","durationMin":180,"distKm":16,"hmTarget":250,"hrTarget":130,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3h Parsberg/Hölzl: 250hm / Ziel 130 bpm","tips":null,"time":"07:00"}
+      {"date":"2026-06-04","dayLabel":"Do","type":"SIM","durationMin":360,"distKm":28,"hmTarget":2000,"hrTarget":130,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"6h Big Day Sim: 2000hm / Ziel 130 bpm · Fronleichnam","tips":"Feiertag · Stöcke · Race-Nutrition üben · Gel alle 30 min","time":"05:00"},
+      {"date":"2026-06-05","dayLabel":"Fr","type":"EL","durationMin":45,"distKm":5,"hmTarget":0,"hrTarget":112,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Rec: Ziel 112 bpm","tips":"Lockere Erholung nach Big Day","time":"07:00"},
+      {"date":"2026-06-07","dayLabel":"Sa","type":"LLH","durationMin":180,"distKm":16,"hmTarget":250,"hrTarget":125,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3h Parsberg/Hölzl: 250hm / Ziel 125 bpm","tips":null,"time":"07:00"}
     ]
   },
   {
     "wk": 6, "phase": "Peak", "targetVol": 66, "targetLong": 25, "targetHm": 2850,
     "note": "Peak-Block 1 · B2B-Wochenende · KH: 80g/h",
     "sessions": [
-      {"date":"2026-06-09","dayLabel":"Di","type":"EL","durationMin":90,"distKm":11,"hmTarget":150,"hrTarget":132,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Z2 Trail Gilching: 150hm / Ziel 132 bpm","tips":null,"time":"05:30"},
+      {"date":"2026-06-09","dayLabel":"Di","type":"EL","durationMin":90,"distKm":11,"hmTarget":150,"hrTarget":126,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Z2 Trail Gilching: 150hm / Ziel 126 bpm","tips":null,"time":"05:30"},
       {"date":"2026-06-10","dayLabel":"Mi","type":"EL","durationMin":60,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Kraft: Exzentrik","tips":null,"time":"06:00"},
-      {"date":"2026-06-11","dayLabel":"Do","type":"IL","durationMin":90,"distKm":8,"hmTarget":800,"hrTarget":158,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Hill Int (Laufband): 800hm / Ziel 158 bpm","tips":"Laufband hohe Steigung · kurze Intervalle · maximale Hm-Akkumulation","time":"05:30"},
-      {"date":"2026-06-13","dayLabel":"Sa","type":"LLH","durationMin":330,"distKm":25,"hmTarget":1800,"hrTarget":140,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"5,5h Berge: 1800hm / Ziel 140 bpm","tips":"Alpen · Stöcke · längster Sa bisher · Nutrition üben","time":"06:00"},
-      {"date":"2026-06-14","dayLabel":"So","type":"BTB","durationMin":180,"distKm":22,"hmTarget":100,"hrTarget":135,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3h B2B Z2: 100hm / Ziel 135 bpm","tips":"Müde Beine · Z2 konservativ · wichtige Adaptation","time":"08:00"}
+      {"date":"2026-06-11","dayLabel":"Do","type":"IL","durationMin":90,"distKm":8,"hmTarget":800,"hrTarget":152,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Hill Int (Laufband): 800hm / Ziel 152 bpm","tips":"Laufband hohe Steigung · kurze Intervalle · maximale Hm-Akkumulation","time":"05:30"},
+      {"date":"2026-06-13","dayLabel":"Sa","type":"LLH","durationMin":330,"distKm":25,"hmTarget":1800,"hrTarget":134,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"5,5h Berge: 1800hm / Ziel 134 bpm","tips":"Alpen · Stöcke · längster Sa bisher · Nutrition üben","time":"06:00"},
+      {"date":"2026-06-14","dayLabel":"So","type":"BTB","durationMin":180,"distKm":22,"hmTarget":100,"hrTarget":130,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3h B2B Z2: 100hm / Ziel 130 bpm","tips":"Müde Beine · Z2 konservativ · wichtige Adaptation","time":"08:00"}
     ]
   },
   {
     "wk": 7, "phase": "Deload", "targetVol": 40, "targetLong": 16, "targetHm": 300,
     "note": "Deload — aktive Erholung · KH: 30g/h",
     "sessions": [
-      {"date":"2026-06-16","dayLabel":"Di","type":"EL","durationMin":60,"distKm":8,"hmTarget":80,"hrTarget":140,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 + Sprints: 80hm / Ziel 140 bpm","tips":null,"time":"05:30"},
+      {"date":"2026-06-16","dayLabel":"Di","type":"EL","durationMin":60,"distKm":8,"hmTarget":80,"hrTarget":135,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 + Sprints: 80hm / Ziel 135 bpm","tips":null,"time":"05:30"},
       {"date":"2026-06-17","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Erhaltung","tips":null,"time":"06:00"},
       {"date":"2026-06-18","dayLabel":"Do","type":"EL","durationMin":60,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Mobilität","tips":null,"time":"06:00"},
-      {"date":"2026-06-20","dayLabel":"Sa","type":"LL","durationMin":150,"distKm":16,"hmTarget":200,"hrTarget":128,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"2,5h Trail: 200hm / Ziel 128 bpm","tips":"Entspannt · kein Druck · Beine erholen lassen","time":"07:00"},
-      {"date":"2026-06-21","dayLabel":"So","type":"EL","durationMin":90,"distKm":12,"hmTarget":20,"hrTarget":122,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Z2 flach: 20hm / Ziel 122 bpm","tips":null,"time":"08:00"}
+      {"date":"2026-06-20","dayLabel":"Sa","type":"LL","durationMin":150,"distKm":16,"hmTarget":200,"hrTarget":122,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"2,5h Trail: 200hm / Ziel 122 bpm","tips":"Entspannt · kein Druck · Beine erholen lassen","time":"07:00"},
+      {"date":"2026-06-21","dayLabel":"So","type":"EL","durationMin":90,"distKm":12,"hmTarget":20,"hrTarget":118,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Z2 flach: 20hm / Ziel 118 bpm","tips":null,"time":"08:00"}
     ]
   },
   {
     "wk": 8, "phase": "Peak", "targetVol": 74, "targetLong": 30, "targetHm": 3000,
     "note": "Peak-Block 2 · Intensitätsspitze · KH: 90g/h",
     "sessions": [
-      {"date":"2026-06-23","dayLabel":"Di","type":"IL","durationMin":90,"distKm":10,"hmTarget":500,"hrTarget":162,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Hill Int 4×10': 500hm / Ziel 162 bpm","tips":"4×10 min bergauf maximal · längste Intervalle bisher","time":"05:30"},
+      {"date":"2026-06-23","dayLabel":"Di","type":"IL","durationMin":90,"distKm":10,"hmTarget":500,"hrTarget":158,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Hill Int 4×10': 500hm / Ziel 158 bpm","tips":"4×10 min bergauf maximal · längste Intervalle bisher","time":"05:30"},
       {"date":"2026-06-24","dayLabel":"Mi","type":"EL","durationMin":60,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Kraft: Downhill","tips":"Exzentrisches Quads-Training · Downhill-Vorbereitung","time":"06:00"},
-      {"date":"2026-06-25","dayLabel":"Do","type":"M","durationMin":90,"distKm":12,"hmTarget":100,"hrTarget":145,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Tempo-Wechsel: 100hm / Ziel 145 bpm","tips":"Wechsel Z2/Z3 · Race-Pace simulieren","time":"05:30"},
-      {"date":"2026-06-27","dayLabel":"Sa","type":"LLH","durationMin":390,"distKm":30,"hmTarget":2200,"hrTarget":138,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"6,5h Berge: 2200hm / Ziel 138 bpm","tips":"Alpen · längster Peak-Tag · Stöcke · Nutrition-Test","time":"05:30"},
-      {"date":"2026-06-28","dayLabel":"So","type":"BTB","durationMin":210,"distKm":22,"hmTarget":200,"hrTarget":134,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3,5h B2B Trail: 200hm / Ziel 134 bpm","tips":"Zweiter Tag nach Maximalbelastung · Z2 halten","time":"07:30"}
+      {"date":"2026-06-25","dayLabel":"Do","type":"M","durationMin":90,"distKm":12,"hmTarget":100,"hrTarget":138,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Tempo-Wechsel: 100hm / Ziel 138 bpm","tips":"Wechsel Z2/Z3 · Race-Pace simulieren","time":"05:30"},
+      {"date":"2026-06-27","dayLabel":"Sa","type":"LLH","durationMin":390,"distKm":30,"hmTarget":2200,"hrTarget":132,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"6,5h Berge: 2200hm / Ziel 132 bpm","tips":"Alpen · längster Peak-Tag · Stöcke · Nutrition-Test","time":"05:30"},
+      {"date":"2026-06-28","dayLabel":"So","type":"BTB","durationMin":210,"distKm":22,"hmTarget":200,"hrTarget":128,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3,5h B2B Trail: 200hm / Ziel 128 bpm","tips":"Zweiter Tag nach Maximalbelastung · Z2 halten","time":"07:30"}
     ]
   },
   {
     "wk": 9, "phase": "Peak", "targetVol": 53, "targetLong": 18, "targetHm": 2390,
     "note": "Peak-Block 3 · Kraftausdauer · KH: 70g/h",
     "sessions": [
-      {"date":"2026-06-30","dayLabel":"Di","type":"IL","durationMin":90,"distKm":9,"hmTarget":550,"hrTarget":148,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Kraftausdauer: 550hm / Ziel 148 bpm","tips":"Parsberg · lang + viel Hm · Kraft über die gesamte Distanz","time":"05:30"},
+      {"date":"2026-06-30","dayLabel":"Di","type":"IL","durationMin":90,"distKm":9,"hmTarget":550,"hrTarget":142,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Kraftausdauer: 550hm / Ziel 142 bpm","tips":"Parsberg · lang + viel Hm · Kraft über die gesamte Distanz","time":"05:30"},
       {"date":"2026-07-01","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Core","tips":null,"time":"06:00"},
-      {"date":"2026-07-02","dayLabel":"Do","type":"EL","durationMin":90,"distKm":10,"hmTarget":300,"hrTarget":135,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Trail technisch: 300hm / Ziel 135 bpm","tips":"Technisches Gelände · Downhill-Technik üben","time":"05:30"},
-      {"date":"2026-07-04","dayLabel":"Sa","type":"LLH","durationMin":240,"distKm":18,"hmTarget":1500,"hrTarget":135,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"4h Berge: 1500hm / Ziel 135 bpm","tips":"Alpen · Stöcke · Z2 Hm-Effizienz","time":"06:00"},
-      {"date":"2026-07-05","dayLabel":"So","type":"EL","durationMin":120,"distKm":16,"hmTarget":40,"hrTarget":128,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"2h Z2 locker: 40hm / Ziel 128 bpm","tips":null,"time":"08:00"}
+      {"date":"2026-07-02","dayLabel":"Do","type":"EL","durationMin":90,"distKm":10,"hmTarget":300,"hrTarget":130,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Trail technisch: 300hm / Ziel 130 bpm","tips":"Technisches Gelände · Downhill-Technik üben","time":"05:30"},
+      {"date":"2026-07-04","dayLabel":"Sa","type":"LLH","durationMin":240,"distKm":18,"hmTarget":1500,"hrTarget":130,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"4h Berge: 1500hm / Ziel 130 bpm","tips":"Alpen · Stöcke · Z2 Hm-Effizienz","time":"06:00"},
+      {"date":"2026-07-05","dayLabel":"So","type":"EL","durationMin":120,"distKm":16,"hmTarget":40,"hrTarget":122,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"2h Z2 locker: 40hm / Ziel 122 bpm","tips":null,"time":"08:00"}
     ]
   },
   {
     "wk": 10, "phase": "Peak", "targetVol": 77, "targetLong": 32, "targetHm": 3480,
     "note": "Letzte Peak-Woche · Finale Belastung · KH: 90g/h",
     "sessions": [
-      {"date":"2026-07-07","dayLabel":"Di","type":"IL","durationMin":90,"distKm":9,"hmTarget":600,"hrTarget":160,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Hill Int 3×15': 600hm / Ziel 160 bpm","tips":"3×15 min bergauf · härteste Intervall-Einheit des Plans","time":"05:30"},
+      {"date":"2026-07-07","dayLabel":"Di","type":"IL","durationMin":90,"distKm":9,"hmTarget":600,"hrTarget":155,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Hill Int 3×15': 600hm / Ziel 155 bpm","tips":"3×15 min bergauf · härteste Intervall-Einheit des Plans","time":"05:30"},
       {"date":"2026-07-08","dayLabel":"Mi","type":"EL","durationMin":60,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Kraft: Peak","tips":null,"time":"06:00"},
-      {"date":"2026-07-09","dayLabel":"Do","type":"EL","durationMin":90,"distKm":12,"hmTarget":80,"hrTarget":132,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Z2 + Steigerungen: 80hm / Ziel 132 bpm","tips":null,"time":"05:30"},
-      {"date":"2026-07-11","dayLabel":"Sa","type":"LLH","durationMin":420,"distKm":32,"hmTarget":2500,"hrTarget":136,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"7h Berge (Finale): 2500hm / Ziel 136 bpm","tips":"Alpen · größte Einheit des Plans · Stöcke · alles Gelernte einsetzen","time":"05:00"},
-      {"date":"2026-07-12","dayLabel":"So","type":"BTB","durationMin":240,"distKm":24,"hmTarget":300,"hrTarget":132,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"4h B2B: 300hm / Ziel 132 bpm","tips":"Müde Beine laufen · letzte große B2B-Einheit","time":"07:30"}
+      {"date":"2026-07-09","dayLabel":"Do","type":"EL","durationMin":90,"distKm":12,"hmTarget":80,"hrTarget":126,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Z2 + Steigerungen: 80hm / Ziel 126 bpm","tips":null,"time":"05:30"},
+      {"date":"2026-07-11","dayLabel":"Sa","type":"LLH","durationMin":420,"distKm":32,"hmTarget":2500,"hrTarget":132,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"7h Berge (Finale): 2500hm / Ziel 132 bpm","tips":"Alpen · größte Einheit des Plans · Stöcke · alles Gelernte einsetzen","time":"05:00"},
+      {"date":"2026-07-12","dayLabel":"So","type":"BTB","durationMin":240,"distKm":24,"hmTarget":300,"hrTarget":128,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"4h B2B: 300hm / Ziel 128 bpm","tips":"Müde Beine laufen · letzte große B2B-Einheit","time":"07:30"}
     ]
   },
   {
     "wk": 11, "phase": "Taper", "targetVol": 45, "targetLong": 18, "targetHm": 850,
     "note": "Taper beginnt · Volumen runter · KH: 60g/h",
     "sessions": [
-      {"date":"2026-07-14","dayLabel":"Di","type":"IL","durationMin":60,"distKm":7,"hmTarget":300,"hrTarget":155,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Hill Int spritzig: 300hm / Ziel 155 bpm","tips":"Kürzer aber knackig · Schärfe erhalten","time":"05:30"},
+      {"date":"2026-07-14","dayLabel":"Di","type":"IL","durationMin":60,"distKm":7,"hmTarget":300,"hrTarget":150,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Hill Int spritzig: 300hm / Ziel 150 bpm","tips":"Kürzer aber knackig · Schärfe erhalten","time":"05:30"},
       {"date":"2026-07-15","dayLabel":"Mi","type":"EL","durationMin":45,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Kraft: Erhaltung","tips":null,"time":"06:00"},
-      {"date":"2026-07-16","dayLabel":"Do","type":"EL","durationMin":60,"distKm":8,"hmTarget":20,"hrTarget":125,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 flach: 20hm / Ziel 125 bpm","tips":null,"time":"05:30"},
-      {"date":"2026-07-18","dayLabel":"Sa","type":"LLH","durationMin":210,"distKm":18,"hmTarget":500,"hrTarget":130,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3,5h Trail (Poles): 500hm / Ziel 130 bpm","tips":"Stöcke · Race-Pace üben · locker aber fokussiert","time":"06:30"},
-      {"date":"2026-07-19","dayLabel":"So","type":"EL","durationMin":90,"distKm":12,"hmTarget":30,"hrTarget":124,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Z2: 30hm / Ziel 124 bpm","tips":null,"time":"08:00"}
+      {"date":"2026-07-16","dayLabel":"Do","type":"EL","durationMin":60,"distKm":8,"hmTarget":20,"hrTarget":120,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"60' Z2 flach: 20hm / Ziel 120 bpm","tips":null,"time":"05:30"},
+      {"date":"2026-07-18","dayLabel":"Sa","type":"LLH","durationMin":210,"distKm":18,"hmTarget":500,"hrTarget":125,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"3,5h Trail (Poles): 500hm / Ziel 125 bpm","tips":"Stöcke · Race-Pace üben · locker aber fokussiert","time":"06:30"},
+      {"date":"2026-07-19","dayLabel":"So","type":"EL","durationMin":90,"distKm":12,"hmTarget":30,"hrTarget":118,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"90' Z2: 30hm / Ziel 118 bpm","tips":null,"time":"08:00"}
     ]
   },
   {
     "wk": 12, "phase": "Taper", "targetVol": 29, "targetLong": 14, "targetHm": 260,
     "note": "Finaler Taper · frisch werden · KH: 40g/h",
     "sessions": [
-      {"date":"2026-07-21","dayLabel":"Di","type":"EL","durationMin":45,"distKm":6,"hmTarget":40,"hrTarget":128,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Z2 + Strides: 40hm / Ziel 128 bpm","tips":null,"time":"05:30"},
+      {"date":"2026-07-21","dayLabel":"Di","type":"EL","durationMin":45,"distKm":6,"hmTarget":40,"hrTarget":122,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Z2 + Strides: 40hm / Ziel 122 bpm","tips":null,"time":"05:30"},
       {"date":"2026-07-22","dayLabel":"Mi","type":"EL","durationMin":30,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"30' Mobilität","tips":null,"time":"06:30"},
-      {"date":"2026-07-23","dayLabel":"Do","type":"EL","durationMin":45,"distKm":6,"hmTarget":20,"hrTarget":120,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Z2 locker: 20hm / Ziel 120 bpm","tips":null,"time":"05:30"},
-      {"date":"2026-07-25","dayLabel":"Sa","type":"LL","durationMin":120,"distKm":14,"hmTarget":200,"hrTarget":125,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"2h Trail (Race Shoes): 200hm / Ziel 125 bpm","tips":"Race Shoes anziehen · Gefühl für Renntag · locker","time":"07:00"}
+      {"date":"2026-07-23","dayLabel":"Do","type":"EL","durationMin":45,"distKm":6,"hmTarget":20,"hrTarget":115,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"45' Z2 locker: 20hm / Ziel 115 bpm","tips":null,"time":"05:30"},
+      {"date":"2026-07-25","dayLabel":"Sa","type":"LL","durationMin":120,"distKm":14,"hmTarget":200,"hrTarget":120,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"2h Trail (Race Shoes): 200hm / Ziel 120 bpm","tips":"Race Shoes anziehen · Gefühl für Renntag · locker","time":"07:00"}
     ]
   },
   {
     "wk": 13, "phase": "Race Week", "targetVol": 104, "targetLong": 100, "targetHm": 3310,
     "note": "🏁 RACE WEEK – GO FOR IT! Fjällmarathon / 3300hm · 30. Juli 2026",
     "sessions": [
-      {"date":"2026-07-27","dayLabel":"Mo","type":"EL","durationMin":30,"distKm":4,"hmTarget":10,"hrTarget":115,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"30' Trab: 10hm / Ziel 115 bpm","tips":"Nur locker einlaufen · keine Belastung","time":"06:00"},
+      {"date":"2026-07-27","dayLabel":"Mo","type":"EL","durationMin":30,"distKm":4,"hmTarget":10,"hrTarget":110,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"30' Trab: Ziel 110 bpm","tips":"Nur locker einlaufen · keine Belastung","time":"06:00"},
       {"date":"2026-07-28","dayLabel":"Di","type":"EL","durationMin":20,"distKm":null,"hmTarget":0,"hrTarget":null,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"20' Mobilität · Ausrüstung final checken","tips":"Leichtes Dehnen · Packliste · mental vorbereiten","time":"07:00"},
-      {"date":"2026-07-30","dayLabel":"Do","type":"SIM","durationMin":840,"distKm":100,"hmTarget":3300,"hrTarget":136,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"🏆 RACE DAY: Fjällmarathon / 3300hm · Zielzeit 13–14h","tips":"START früh morgens · erste 40km konservativ · Power-Hiking bergauf · Gel alle 30 min · GENIESSE ES!","time":"05:00"}
+      {"date":"2026-07-30","dayLabel":"Do","type":"SIM","durationMin":840,"distKm":100,"hmTarget":3300,"hrTarget":132,"status":"planned","actualKm":null,"actualHm":null,"actualHr":null,"note":"🏆 RACE DAY: Fjällmarathon / 3300hm · Zielzeit 13–14h","tips":"START früh morgens · erste 40km konservativ · Power-Hiking bergauf · Gel alle 30 min · GENIESSE ES!","time":"05:00"}
     ]
   }
 ]
