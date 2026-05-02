@@ -208,30 +208,31 @@ tr.clickable:hover td{background:rgba(168,152,255,.07);cursor:pointer;}
 
 <!-- ══ WELCOME ═════════════════════════════════════════════════════════ -->
 <div id="screen-welcome" class="screen">
-  <div class="upload-inner" style="text-align:center;max-width:440px">
+  <div class="upload-inner" style="text-align:center;max-width:460px">
     <div class="upload-title">
       <div class="icon">🍎</div>
       <h1>Apple Health Analyse</h1>
-    </div>
-    <div id="welcomeStats" style="font-size:13px;color:var(--dim);margin-bottom:24px;line-height:1.7"></div>
-
-    <!-- New-data question -->
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:20px;text-align:left">
-      <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:6px">📲 Neue Apple Health Daten vorhanden?</div>
-      <div style="font-size:12px;color:var(--dim);line-height:1.6">Neue Daten → Gesundheit App → Export → Export.xml importieren.<br/>Keine neuen Daten → direkt weiter zum Dashboard.</div>
+      <div style="font-size:11px;color:var(--dim);margin-top:4px;letter-spacing:1px" id="welcomeVersion"></div>
     </div>
 
-    <button onclick="showScreen('upload')"
-      style="width:100%;padding:16px;background:var(--accent);border:none;border-radius:14px;
-             color:#fff;font-size:16px;font-weight:800;cursor:pointer;margin-bottom:10px">
-      📥 Ja — Neue Daten importieren
+    <!-- Stats summary -->
+    <div id="welcomeStats" style="font-size:13px;color:var(--dim);margin-bottom:20px;line-height:1.8;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-align:left"></div>
+
+    <!-- Cache status -->
+    <div id="welcomeCacheInfo" style="font-size:12px;margin-bottom:16px;padding:10px 14px;border-radius:10px;text-align:left;display:none"></div>
+
+    <!-- Action buttons -->
+    <button onclick="startWithCache()"
+      style="width:100%;padding:16px;background:var(--green);border:none;border-radius:14px;
+             color:#000;font-size:16px;font-weight:800;cursor:pointer;margin-bottom:10px">
+      ▶ Weiter — ohne Neuladen starten
     </button>
-    <button onclick="showScreen('dashboard')"
+    <button onclick="showScreen('upload')"
       style="width:100%;padding:14px;background:var(--card);border:2px solid var(--border);
              border-radius:14px;color:var(--txt);font-size:14px;font-weight:700;cursor:pointer">
-      ▶ Nein — Direkt ins Dashboard
+      📥 Neue Apple Health Daten importieren
     </button>
-    <div style="font-size:12px;color:var(--dim);margin-top:16px;line-height:1.6">
+    <div style="font-size:11px;color:var(--dim);margin-top:14px;line-height:1.6">
       Letzte Aktualisierung: <span id="welcomeLastSync">–</span>
     </div>
   </div>
@@ -386,6 +387,11 @@ const ZONE_DEFS = [
 ];
 
 // ═══════════════════════════════════════════════════════════
+// APP VERSION
+// ═══════════════════════════════════════════════════════════
+const APP_VERSION = 'v2.6';
+
+// ═══════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════
 let ALL_WORKOUTS=[], ALL_RHR=[], ALL_HR_SAMPLES=[];
@@ -432,12 +438,17 @@ function showUpload(){
 var WORKOUT_CACHE_VERSION = 'v4-metaElev';
 
 function initUploadUI(){
-  // ── First: check if we have valid cached data → show welcome screen ───────
+  // ── Always show welcome screen if user has used the app before ─────────
+  var lastSync = null;
+  try{ lastSync = localStorage.getItem('lastSyncDate'); }catch(e){}
+
+  // Try to load cached workout data
+  var cacheOk = false;
   try{
     var cachedVersion = localStorage.getItem('cachedWorkoutsVersion');
     var cached = localStorage.getItem('cachedWorkouts');
     if(cachedVersion !== WORKOUT_CACHE_VERSION){
-      // Stale cache (built before elevation fix) — discard silently
+      // Stale cache — discard silently
       localStorage.removeItem('cachedWorkouts');
       localStorage.removeItem('cachedWorkoutsVersion');
       cached = null;
@@ -454,14 +465,19 @@ function initUploadUI(){
           rangeStart=ALL_WORKOUTS[0].startMs;
           rangeEnd=ALL_WORKOUTS[ALL_WORKOUTS.length-1].startMs;
         }
-        buildDashboard();          // build dashboard silently in background
-        showWelcomeScreen();       // then show the question screen
-        return;
+        buildDashboard();
+        cacheOk = true;
       }
     }
   }catch(e){ console.warn('Cache load failed:', e); }
 
-  // ── No cache → show upload screen ────────────────────────────────────────
+  if(lastSync){
+    // Show welcome screen — user has been here before
+    showWelcomeScreen(cacheOk);
+    return;
+  }
+
+  // ── First-ever start → show upload screen ────────────────────────────────
   showUploadButtons();
   showScreen('upload');
 }
@@ -510,23 +526,78 @@ function showUploadButtons(){
   }
 }
 
-function showWelcomeScreen(){
+function showWelcomeScreen(cacheOk){
+  // Version
+  document.getElementById('welcomeVersion').textContent = APP_VERSION;
+
   var lastSync = '';
   try{ lastSync = localStorage.getItem('lastSyncDate')||''; }catch(e){}
-  var latest = ALL_WORKOUTS.length ? new Date(ALL_WORKOUTS[ALL_WORKOUTS.length-1].startMs) : null;
-  var runs = ALL_WORKOUTS.filter(function(w){return w.type==='Laufen';});
-  var lastRun = runs.length ? runs[runs.length-1] : null;
-  document.getElementById('welcomeStats').innerHTML =
-    '<strong style="color:var(--txt)">'+(ALL_WORKOUTS.length)+' Trainings</strong> · '+
-    (runs.length)+' Läufe<br/>'+
-    (latest ? 'Letzter Eintrag: <strong>'+latest.toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric'})+'</strong>' : '')+
-    (lastRun ? '<br/>Letzter Lauf: '+new Date(lastRun.startMs).toLocaleDateString('de-DE',{weekday:'short',day:'numeric',month:'short'})+
-    ' · '+(lastRun.distanceKm||0).toFixed(1)+'km' : '');
+
+  // Stats
+  var statsHtml = '';
+  if(ALL_WORKOUTS && ALL_WORKOUTS.length > 0){
+    var runs = ALL_WORKOUTS.filter(function(w){return w.type==='Laufen';});
+    var lastRun = runs.length ? runs[runs.length-1] : null;
+    var latest = ALL_WORKOUTS[ALL_WORKOUTS.length-1];
+    statsHtml += '🏃 <strong style="color:var(--white)">'+ALL_WORKOUTS.length+' Trainings</strong> · '+runs.length+' Läufe geladen<br/>';
+    if(latest) statsHtml += '📅 Letzter Eintrag: <strong style="color:var(--white)">'+new Date(latest.startMs).toLocaleDateString('de-DE',{weekday:'short',day:'numeric',month:'long',year:'numeric'})+'</strong><br/>';
+    if(lastRun) statsHtml += '👟 Letzter Lauf: '+new Date(lastRun.startMs).toLocaleDateString('de-DE',{weekday:'short',day:'numeric',month:'short'})
+      +' · '+(lastRun.distanceKm||0).toFixed(1)+'km'
+      +(lastRun.elevationM>0?' · '+(lastRun.elevationM||0).toFixed(0)+'hm↑':'');
+  } else {
+    statsHtml += '📦 Keine Workout-Daten im Speicher<br/>';
+    if(lastSync) statsHtml += '📅 Zuletzt importiert: '+new Date(lastSync).toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric'});
+  }
+  // Plan info
+  try{
+    var plan = loadPlan();
+    if(plan){
+      var today = new Date().toISOString().slice(0,10);
+      var daysLeft = Math.ceil((new Date('2026-07-30')-new Date())/86400000);
+      var allS = plan.flatMap(function(w){return w.sessions;}).filter(function(s){return s.type!=='R'&&s.date<=today;});
+      var doneS = allS.filter(function(s){return s.status==='done';});
+      var comp = allS.length ? Math.round(doneS.length/allS.length*100) : 0;
+      statsHtml += '<br/>🎯 Fjällmarathon: <strong style="color:var(--accent)">'+daysLeft+' Tage</strong> · Compliance <strong style="color:var(--green)">'+comp+'%</strong>';
+    }
+  }catch(e){}
+  document.getElementById('welcomeStats').innerHTML = statsHtml;
+
+  // Cache status badge
+  var cacheEl = document.getElementById('welcomeCacheInfo');
+  if(cacheOk){
+    cacheEl.style.display = 'block';
+    cacheEl.style.background = 'rgba(26,255,160,0.08)';
+    cacheEl.style.border = '1px solid rgba(26,255,160,0.3)';
+    cacheEl.style.color = 'var(--green)';
+    cacheEl.innerHTML = '✅ Daten im Speicher — sofort startbereit';
+  } else {
+    cacheEl.style.display = 'block';
+    cacheEl.style.background = 'rgba(255,170,85,0.08)';
+    cacheEl.style.border = '1px solid rgba(255,170,85,0.3)';
+    cacheEl.style.color = 'var(--orange)';
+    cacheEl.innerHTML = '⚠️ Kein Cache — "Weiter" öffnet Dashboard ohne Workout-Daten.<br/>Für volle Analyse bitte neu importieren.';
+  }
+
   if(lastSync){
     document.getElementById('welcomeLastSync').textContent =
       new Date(lastSync).toLocaleDateString('de-DE',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
   }
   showScreen('welcome');
+}
+
+// ── "Weiter ohne Neuladen" button handler ────────────────────────────────
+function startWithCache(){
+  if(ALL_WORKOUTS && ALL_WORKOUTS.length > 0){
+    showScreen('dashboard');
+  } else {
+    // No data in memory — offer plan-only view or redirect to upload
+    if(confirm('Keine Workout-Daten geladen.\n\nZum Dashboard ohne Läufe-Daten? (Trainingsplan ist verfügbar)\n\nOK = Dashboard, Abbrechen = Neuen Import starten')){
+      showScreen('dashboard');
+    } else {
+      showUploadButtons();
+      showScreen('upload');
+    }
+  }
 }
 
 // Chrome: folder picker
@@ -1730,7 +1801,7 @@ function updatePlanProgressComment(){
   } else if(volumeTrend>110){
     comment += `<span style="color:var(--yellow)">💡 Über dem Zielvolumen — auf Erholung achten, nicht überlasten.</span>`;
   } else if(compliance>=85){
-    comment += `<span style="color:var(--green)">💪 Stark! Auf diesem Kurs zum 100k-Finish.</span>`;
+    comment += `<span style="color:var(--green)">💪 Stark! Auf diesem Kurs zum Fjällmarathon-Finish.</span>`;
   }
 
   // Inject into plan tab overview section if it exists
@@ -2961,84 +3032,16 @@ function confirmCheckin(date, status){
 setTimeout(()=>{ if(document.getElementById('screen-dashboard').classList.contains('active')) maybeShowDailyCheckin(); }, 1500);
 
 
-// ═══════════════════════════════════════════════════════════
-// WELCOME SCREEN — check for existing data on startup
-// ═══════════════════════════════════════════════════════════
+// maybeShowWelcome — called after a fresh import to return to welcome screen
 function maybeShowWelcome(){
   try{
     var lastSync = localStorage.getItem('lastSyncDate');
-    var planData = loadPlan();
     if(lastSync && ALL_WORKOUTS && ALL_WORKOUTS.length > 0){
-      // We have data in memory — show welcome
-      document.getElementById('welcomeLastSync').textContent =
-        new Date(lastSync).toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      var runs = ALL_WORKOUTS.filter(function(w){return w.type==='Laufen';});
-      var lastRun = runs.length ? runs[runs.length-1] : null;
-      if(lastRun){
-        document.getElementById('welcomeStats').innerHTML =
-          'Letzter Lauf: <strong style="color:var(--white)">'
-          +new Date(lastRun.startMs).toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})+'</strong><br/>'
-          +Math.round(lastRun.distanceKm||0)+'km · '+(lastRun.hrMean||'–')+' bpm ø · '+(lastRun.elevationM||0)+'hm↑';
-      }
-      var plan = planData;
-      if(plan){
-        var today = new Date().toISOString().slice(0,10);
-        var allS = plan.flatMap(function(w){return w.sessions;}).filter(function(s){return s.type!=='R'&&s.date<=today;});
-        var doneS = allS.filter(function(s){return s.status==='done';});
-        var comp = allS.length ? Math.round(doneS.length/allS.length*100) : 0;
-        var daysLeft = Math.ceil((new Date('2026-07-30')-new Date())/86400000);
-        document.getElementById('welcomeStats').innerHTML +=
-          '<br/>Plan: <strong style="color:var(--green)">'+comp+'% Compliance</strong>'
-          +' · '+daysLeft+' Tage bis zum Start';
-      }
-      showScreen('welcome');
+      showWelcomeScreen(true);
       return true;
     }
   }catch(e){}
   return false;
-}
-
-// Check on page load — if data was previously loaded show welcome
-window.addEventListener('load', function(){
-  // Only show welcome if we have cached workout data
-  // (in this app data is not persisted across sessions, so on fresh load always show upload)
-  // But if plan exists, offer to skip re-upload
-  try{
-    var lastSync = localStorage.getItem('lastSyncDate');
-    if(lastSync){
-      document.getElementById('welcomeLastSync').textContent =
-        new Date(lastSync).toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric'});
-      // Show welcome with option to reload data or go to plan-only view
-      showWelcomeOnLoad();
-    }
-  }catch(e){}
-});
-
-function showWelcomeOnLoad(){
-  try{
-    var lastSync = localStorage.getItem('lastSyncDate');
-    if(!lastSync) return;
-    var plan = loadPlan();
-    var daysLeft = Math.ceil((new Date('2026-07-30')-new Date())/86400000);
-    var today = new Date().toISOString().slice(0,10);
-    var stats = '';
-    if(plan){
-      var allS = plan.flatMap(function(w){return w.sessions;}).filter(function(s){return s.type!=='R'&&s.date<=today;});
-      var doneS = allS.filter(function(s){return s.status==='done';});
-      var comp = allS.length ? Math.round(doneS.length/allS.length*100) : 0;
-      var curWk = 1;
-      for(var i=0;i<plan.length;i++){
-        if(plan[i].sessions.some(function(s){return s.date<=today;})) curWk=plan[i].wk;
-      }
-      stats = 'Trainingsplan Woche '+curWk+'/15 · <strong style="color:var(--green)">'+comp+'% Compliance</strong><br/>'
-        +'<strong style="color:var(--accent)">'+daysLeft+' Tage</strong> bis zum 100k Start (30. Juli 2026)';
-    }
-    document.getElementById('welcomeStats').innerHTML = stats ||
-      'Letzte Daten vom '+new Date(lastSync).toLocaleDateString('de-DE',{day:'numeric',month:'long'});
-    document.getElementById('welcomeLastSync').textContent =
-      new Date(lastSync).toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric'});
-    showScreen('welcome');
-  }catch(e){}
 }
 
 // ═══════════════════════════════════════════════════════════
