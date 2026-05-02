@@ -1,0 +1,30 @@
+name: Sync index.html
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apple_health_analyse_25.html'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy app to index.html
+        run: cp apple_health_analyse_25.html index.html
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "index.html already up to date"
+          else
+            git commit -m "chore: sync index.html from apple_health_analyse_25.html [skip ci]"
+            git push
+          fi
