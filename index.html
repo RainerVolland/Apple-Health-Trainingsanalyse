@@ -7,13 +7,25 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Frühes Theme-Init: verhindert Flash beim Laden -->
+<script>(function(){var t=localStorage.getItem('theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');else document.documentElement.setAttribute('data-theme','dark');}());</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
+
+/* ── DARK THEME (Standard) ── */
 :root{
   --bg:#05050e;--panel:#0c0c1e;--card:#131326;--border:#32325a;
   --txt:#eaeaf8;--dim:#9898c0;--white:#fff;
   --accent:#a898ff;--green:#1affa0;--orange:#ffaa55;
   --red:#ff5577;--blue:#33ddff;--yellow:#ffe566;
+}
+
+/* ── LIGHT THEME ── */
+:root[data-theme='light']{
+  --bg:#f0f0f8;--panel:#ffffff;--card:#e6e6f5;--border:#c4c4e0;
+  --txt:#1a1a35;--dim:#5858a0;--white:#0a0a20;
+  --accent:#5040c8;--green:#007a4d;--orange:#b86200;
+  --red:#c01840;--blue:#0068a8;--yellow:#7a6800;
 }
 body{background:var(--bg);color:var(--txt);font-family:'Helvetica Neue',Arial,sans-serif;font-size:15px;min-height:100vh;}
 button,select,input{font-family:inherit;cursor:pointer;}
@@ -143,8 +155,39 @@ tr.clickable:hover td{background:rgba(168,152,255,.07);cursor:pointer;}
 
 /* ── MAP ── */
 #map{height:380px;border-radius:12px;overflow:hidden;}
-.leaflet-container{background:#0c0c1e !important;}
-.leaflet-tile-pane{filter:brightness(.85);}
+.leaflet-container{background:var(--panel) !important;}
+:root[data-theme='dark'] .leaflet-tile-pane{filter:brightness(.85);}
+:root[data-theme='light'] .leaflet-tile-pane{filter:none;}
+
+/* ── THEME TOGGLE BUTTON ── */
+.theme-toggle{
+  position:fixed;bottom:20px;right:20px;z-index:9999;
+  background:var(--panel);border:2px solid var(--border);
+  border-radius:50%;width:44px;height:44px;
+  font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .2s, background .2s;
+  box-shadow:0 3px 12px rgba(0,0,0,.35);
+}
+.theme-toggle:hover{border-color:var(--accent);}
+
+/* ── LIGHT MODE ANPASSUNGEN ── */
+:root[data-theme='light'] .topbar-badge{background:rgba(0,122,77,.12);border-color:rgba(0,122,77,.3);color:var(--green);}
+:root[data-theme='light'] .sport-badge{background:rgba(80,64,200,.12);color:var(--accent);}
+:root[data-theme='light'] .gpx-pill{background:rgba(0,122,77,.1);color:var(--green);border-color:rgba(0,122,77,.25);}
+:root[data-theme='light'] .notion-result{background:rgba(0,122,77,.08);border-color:rgba(0,122,77,.3);}
+:root[data-theme='light'] .nr-title{color:var(--green);}
+:root[data-theme='light'] .nr-link{background:var(--green);color:#fff;}
+:root[data-theme='light'] .notion-error{background:rgba(192,24,64,.08);border-color:rgba(192,24,64,.3);color:#c01840;}
+:root[data-theme='light'] .xml-btn.drag{background:rgba(80,64,200,.06);}
+:root[data-theme='light'] tr.clickable:hover td{background:rgba(80,64,200,.05);}
+:root[data-theme='light'] ::-webkit-scrollbar-thumb{background:var(--border);}
+:root[data-theme='light'] .progress-fill{background:linear-gradient(90deg,var(--accent),var(--red));}
+:root[data-theme='light'] .folder-btn{background:var(--accent);}
+:root[data-theme='light'] .folder-btn:hover{background:#4030a8;}
+:root[data-theme='light'] .apply-btn{background:var(--accent);border-color:var(--accent);}
+:root[data-theme='light'] .push-btn{background:var(--accent);}
+:root[data-theme='light'] .push-btn:hover{background:#4030a8;}
 
 /* ── ZONE LEGEND ── */
 .zone-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;}
@@ -205,6 +248,9 @@ tr.clickable:hover td{background:rgba(168,152,255,.07);cursor:pointer;}
 </style>
 </head>
 <body>
+
+<!-- ══ THEME TOGGLE ══════════════════════════════════════════════════ -->
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Hell/Dunkel wechseln">🌙</button>
 
 <!-- ══ WELCOME ═════════════════════════════════════════════════════════ -->
 <div id="screen-welcome" class="screen">
@@ -389,7 +435,7 @@ const ZONE_DEFS = [
 // ═══════════════════════════════════════════════════════════
 // APP VERSION
 // ═══════════════════════════════════════════════════════════
-const APP_VERSION = 'v2.6';
+const APP_VERSION = 'v2.7';
 
 // ═══════════════════════════════════════════════════════════
 // STATE
@@ -407,8 +453,27 @@ let detailMap=null;
 // ═══════════════════════════════════════════════════════════
 try{['ultra100k_plan_v1','ultra100k_plan_v2','ultra100k_plan_v3','ultra100k_plan_v4','ultra100k_plan_v5'].forEach(function(k){localStorage.removeItem(k);});}catch(e){}
 
+// ═══════════════════════════════════════════════════════════
+// THEME (Hell / Dunkel)
+// ═══════════════════════════════════════════════════════════
+function initTheme(){
+  var saved = localStorage.getItem('theme') || 'dark';
+  applyTheme(saved);
+}
+function applyTheme(mode){
+  document.documentElement.setAttribute('data-theme', mode);
+  try{ localStorage.setItem('theme', mode); }catch(e){}
+  var btn = document.getElementById('themeToggle');
+  if(btn) btn.textContent = (mode === 'dark') ? '☀️' : '🌙';
+}
+function toggleTheme(){
+  var current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
 document.getElementById('ageDisplay').textContent = AUTO_AGE+' Jahre';
 document.getElementById('maxHRDisplay').textContent = 'Max-HF = '+MAX_HR+' bpm';
+initTheme();
 initUploadUI();
 
 // ═══════════════════════════════════════════════════════════
