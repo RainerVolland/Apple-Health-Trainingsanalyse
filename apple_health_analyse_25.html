@@ -1094,7 +1094,7 @@ async function streamParse(file,maxHR,onProgress){
         const se=inn.indexOf('>',ss);if(se<0)break;ip=se+1;
         const sa=inn.slice(ss+19,se),st=ga(sa,'type');
         if(st==='HKQuantityTypeIdentifierActiveEnergyBurned')cal=parseFloat(ga(sa,'sum'))||0;
-        if(st==='HKQuantityTypeIdentifierDistanceWalkingRunning')dist=parseFloat(ga(sa,'sum'))||0;
+        if(st==='HKQuantityTypeIdentifierDistanceWalkingRunning'||st==='HKQuantityTypeIdentifierDistanceCycling')dist=parseFloat(ga(sa,'sum'))||0;
       }
       // Apple Watch barometric elevation is stored as MetadataEntry, e.g. value="145022 cm"
       const parseMetaElev = key => {
